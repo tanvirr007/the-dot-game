@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Dot Game - Classic Dots and Boxes</title>
+    <meta name="description"
+        content="A modern Dots and Boxes game. Play against a friend or a smart AI on any device.">
+    <link rel="stylesheet" href="src/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Setup Menu -->
+        <section id="setup-menu" class="screen">
+            <div class="glass-card">
+                <h1 class="title">The Dot Game</h1>
+                <p class="subtitle">Classic Dots and Boxes</p>
+
+                <div class="setup-group">
+                    <label>Game Mode</label>
+                    <div class="toggle-group">
+                        <button id="mode-1v1" class="toggle-btn active" onclick="setMode('1v1')">1 vs 1</button>
+                        <button id="mode-pvc" class="toggle-btn" onclick="setMode('pvc')">vs Computer</button>
+                    </div>
+                </div>
+
+                <div id="pvc-options" class="setup-group hidden">
+                    <label>AI Difficulty</label>
+                    <div class="toggle-group">
+                        <button id="diff-easy" class="toggle-btn active" onclick="setDiff('easy')">Easy</button>
+                        <button id="diff-medium" class="toggle-btn" onclick="setDiff('medium')">Medium</button>
+                    </div>
+                </div>
+
+                <button id="start-btn" class="primary-btn">Start Game</button>
+            </div>
+        </section>
+
+        <!-- Game Screen -->
+        <section id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <div class="scoreboard">
+                    <div id="p1-score" class="score-card p1 active">
+                        <span class="player-name">Player 1</span>
+                        <span class="player-points">0</span>
+                    </div>
+                    <div id="p2-score" class="score-card p2">
+                        <span class="player-name">Player 2</span>
+                        <span class="player-points">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="board-container">
+                <div id="game-board"></div>
+            </div>
+
+            <div class="game-controls">
+                <button id="quit-btn" class="secondary-btn">Quit Game</button>
+            </div>
+        </section>
+
+        <!-- Results Screen -->
+        <section id="results-screen" class="screen hidden">
+            <div class="glass-card">
+                <h2 class="title">Game Over</h2>
+                <div id="winner-announcement" class="winner-text">Player 1 Wins!</div>
+
+                <div class="final-scores">
+                    <div class="final-score-card p1">
+                        <span class="final-player-name">Player 1</span>
+                        <span class="final-player-points" id="final-p1-score">0</span>
+                    </div>
+                    <div class="final-score-card p2">
+                        <span class="final-player-name">Player 2</span>
+                        <span class="final-player-points" id="final-p2-score">0</span>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button id="rematch-btn" class="primary-btn">Rematch</button>
+                    <button id="new-game-btn" class="secondary-btn">New Game</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="src/script.js"></script>
+</body>
+
+</html>
