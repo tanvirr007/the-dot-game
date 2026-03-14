@@ -126,7 +126,7 @@ body {
 .primary-btn {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(to right, var(--accent-p1), #2563eb);
+    background: var(--accent-p1);
     color: white;
     border: none;
     border-radius: 12px;
