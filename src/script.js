@@ -452,14 +452,14 @@ function computerMove() {
 
 function getBestMove() {
     // 0. Use Minimax for perfect play if the search space is small enough
-    if (gameState.availableLines.length <= 10 || (gameState.gridSize === 3 && gameState.availableLines.length <= 15)) {
+    if (gameState.availableLines.length <= 14) {
         transpositionTable.clear();
         let bestVal = -Infinity;
         let bestMove = null;
         
         const simDrawn = new Set();
-        // Depth-limited search for performance
-        const searchDepth = gameState.availableLines.length > 12 ? 6 : 8;
+        // Depth-limited search for performance on larger grids/earlier states
+        const searchDepth = gameState.availableLines.length > 10 ? 8 : 12;
 
         for (let lineId of gameState.availableLines) {
             const oldTurn = gameState.currentTurn;
@@ -508,24 +508,28 @@ function getBestMove() {
     // 2. Priority: Take a "Safe" line (doesn't give a box)
     const safeLines = gameState.availableLines.filter(id => !wouldGiveBox(id));
     if (safeLines.length > 0) {
-        // Strategic Improvement: Prefer "Quiet" safe moves
-        // A quiet move is one that doesn't create a box with 2 sides already drawn
-        const quietLines = safeLines.filter(id => {
-            const boxes = getBoxesForLine(id);
-            return boxes.every(([br, bc]) => {
-                const sides = getBoxSides(br, bc);
-                const drawnCount = sides.filter(sid => {
-                    const s = document.getElementById(sid);
-                    return s && (s.classList.contains('drawn') || s.id === id);
-                }).length;
-                return drawnCount <= 2; // If drawing this makes 3, it's not quiet (it would give a box next turn)
-                // Actually, drawnCount here includes the line itself. 
-                // So drawnCount <= 2 means 1 or 2 sides will be drawn.
+        if (gameState.difficulty === 'hard') {
+            // Layered safe moves for expert play:
+            // 1. Prefer moves that only touch boxes with 0 or 1 side drawn (making them 1 or 2)
+            // 2. Avoid moves that make a box have 3 sides drawn (if other options exist)
+            
+            const bestSafe = safeLines.filter(id => {
+                const boxes = getBoxesForLine(id);
+                return boxes.every(([br, bc]) => {
+                    const sides = getBoxSides(br, bc);
+                    const drawnCount = sides.filter(sid => {
+                        const s = document.getElementById(sid);
+                        return s && s.classList.contains('drawn');
+                    }).length;
+                    return drawnCount <= 1; // Drawing this makes it 1 or 2. Perfectly safe.
+                });
             });
-        });
 
-        const targetPool = (quietLines.length > 0 && gameState.difficulty === 'hard') ? quietLines : safeLines;
-        return targetPool[Math.floor(Math.random() * targetPool.length)];
+            if (bestSafe.length > 0) return bestSafe[Math.floor(Math.random() * bestSafe.length)];
+        }
+        
+        // If no "perfectly safe" moves or not on Hard, pick from all safe lines
+        return safeLines[Math.floor(Math.random() * safeLines.length)];
     }
 
     // 3. Priority: If forced to give a box, give the SHORTEST chain
@@ -663,19 +667,25 @@ function isFinalChain(chain) {
 function shouldDoubleCross(chain) {
     if (chain.length < 3) return false;
     
-    // Expert Move: If taking a long chain, leave 2 boxes for the opponent
-    // This forces THEM to open the next chain, giving us control.
-    // Recommended when there are other chains (or just one other chain) left.
+    // Expert Move Optimization:
+    // Only double-cross if it's strategically necessary to control future chains.
+    // If we're already winning significantly, just take the points.
     
     const remainingLines = gameState.availableLines.filter(id => !chain.includes(id));
-    // If no lines left after this chain, don't double cross, just win.
     if (remainingLines.length === 0) return false;
 
-    // Count how many "chains" are left. If multiple chains, double cross is good.
-    // For simplicity: if all remaining moves are "forced" (give a box), double cross.
+    // Is there at least one other long chain remaining elsewhere?
+    // If all remaining moves are forced, then there's likely another chain.
     const safeRemaining = remainingLines.filter(id => !wouldGiveBox(id));
-    if (safeRemaining.length > 0) return false;
+    if (safeRemaining.length > 0) return false; // Don't trap ourselves too early
     
+    // Don't double-cross if it loses us the game immediately
+    const pointsIfDoubleCross = chain.length - 2;
+    const opponentPoints = gameState.player1.score + 2; // They get 2 boxes
+    if (gameState.player2.score + pointsIfDoubleCross < opponentPoints && remainingLines.length < 4) {
+        return false;
+    }
+
     return true;
 }
 
@@ -709,7 +719,15 @@ function minimaxSearch(depth, alpha, beta, isMaximizing, simDrawn) {
 
     const totalDrawnCount = simDrawn.size + (gameState.totalLines - gameState.availableLines.length);
     if (totalDrawnCount === gameState.totalLines || depth === 0) {
-        return (gameState.player2.score - gameState.player1.score) * 100;
+        // Advanced Heuristic Evaluation
+        const scoreDiff = gameState.player2.score - gameState.player1.score;
+        
+        // If we found a winning terminal state, weight it extremely highly
+        if (totalDrawnCount === gameState.totalLines) {
+            return scoreDiff > 0 ? 1000 + scoreDiff : -1000 + scoreDiff;
+        }
+
+        return scoreDiff * 10;
     }
 
     let bestVal = isMaximizing ? -Infinity : Infinity;
