@@ -152,19 +152,36 @@ body {
 .primary-btn {
     width: 100%;
     padding: 16px;
-    background: var(--accent-p1);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--accent-p1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 16px;
+    font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    transition: transform 0.2s, opacity 0.2s;
-    margin-top: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 24px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .primary-btn:hover:not(:disabled) {
-    transform: scale(1.02);
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent-p1);
+    color: white;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+    transform: translateY(-2px);
+}
+
+.primary-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.primary-btn:active:not(:disabled) {
+    transform: translateY(0);
 }
 
 .primary-btn:disabled {
