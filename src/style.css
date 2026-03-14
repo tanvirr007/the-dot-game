@@ -339,7 +339,18 @@ body {
 
 .button-row {
     display: flex;
-    gap: 15px;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.button-row .primary-btn,
+.button-row .secondary-btn {
+    flex: 1;
+    margin-top: 0;
+    padding: 14px 10px;
+    font-size: 1rem;
+    min-width: 0;
 }
 
 .game-controls {
