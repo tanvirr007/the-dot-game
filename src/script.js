@@ -254,7 +254,11 @@ function fillBox(r, c) {
     if (!box || box.classList.contains('filled')) return;
 
     box.classList.add('filled', `filled-p${gameState.currentTurn}`);
-    box.querySelector('.box-word').textContent = box.dataset.number;
+    
+    // Show A for Player 1, B for Player 2
+    const initial = gameState.currentTurn === 1 ? 'A' : 'B';
+    box.querySelector('.box-word').textContent = initial;
+    
     gameState.filledBoxes++;
 }
 
