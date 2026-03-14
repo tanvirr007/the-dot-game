@@ -61,7 +61,7 @@ function setMode(mode) {
 function setDiff(diff) {
     vibrate(20);
     gameState.difficulty = diff;
-    document.querySelectorAll('#diff-easy, #diff-medium').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('#diff-easy, #diff-medium, #diff-hard').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`diff-${diff}`).classList.add('active');
 }
 
@@ -308,11 +308,20 @@ function computerMove() {
 
     let targetLineId = null;
 
-    if (gameState.difficulty === 'medium') {
+    if (gameState.difficulty === 'medium' || gameState.difficulty === 'hard') {
+        // ALWAYS take a completing line if available
         targetLineId = findBoxCompletingLine();
-        // Also try to avoid giving player a box (defensive play)
-        if (!targetLineId) {
+    }
+
+    if (!targetLineId) {
+        if (gameState.difficulty === 'hard') {
+            // Hard: ALWAYS take a safe line if one exists
             targetLineId = findSafeLine();
+        } else if (gameState.difficulty === 'medium') {
+            // Medium: 50% chance to make a random sub-optimal move instead of a safe one
+            if (Math.random() > 0.5) {
+                targetLineId = findSafeLine();
+            }
         }
     }
 
