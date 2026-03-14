@@ -150,6 +150,8 @@ function startGame() {
     gameState.currentTurn = gameState.mode === 'pvc' ? gameState.startingPlayer : 1;
     gameState.gameOver = false;
     gameState.availableLines = [];
+    gameState.allLineIds = [];
+    gameState.totalLines = 0;
 
     vibrate(30);
 
@@ -269,6 +271,8 @@ function createLine(r, c, type, spacing, dotSize) {
 
     gameBoard.appendChild(line);
     gameState.availableLines.push(line.id);
+    gameState.allLineIds.push(line.id);
+    gameState.totalLines++;
 }
 
 function handleLineClick(line, isManual = false) {
@@ -381,102 +385,318 @@ function updateScoreboardNames() {
 // AI Logic
 function computerMove() {
     if (gameState.gameOver || gameState.currentTurn !== 2) return;
-    if (gameState.availableLines.length === 0) return; // Safety guard
+    if (gameState.availableLines.length === 0) return;
 
     let targetLineId = null;
 
-    if (gameState.difficulty === 'medium' || gameState.difficulty === 'hard') {
-        // ALWAYS take a completing line if available
+    if (gameState.difficulty === 'easy') {
+        // Easy: Randomly pick completing lines (50%) or any line
         targetLineId = findBoxCompletingLine();
-    }
-
-    if (!targetLineId) {
-        if (gameState.difficulty === 'hard') {
-            // Hard: ALWAYS take a safe line if one exists
-            targetLineId = findSafeLine();
-        } else if (gameState.difficulty === 'medium') {
-            // Medium: 50% chance to make a random sub-optimal move instead of a safe one
-            if (Math.random() > 0.5) {
-                targetLineId = findSafeLine();
-            }
+        if (!targetLineId || Math.random() > 0.5) {
+            const randomIndex = Math.floor(Math.random() * gameState.availableLines.length);
+            targetLineId = gameState.availableLines[randomIndex];
         }
-    }
-
-    if (!targetLineId) {
-        // Random move
-        const randomIndex = Math.floor(Math.random() * gameState.availableLines.length);
-        targetLineId = gameState.availableLines[randomIndex];
+    } else {
+        // Medium & Hard use strategic logic
+        targetLineId = getBestMove();
+        
+        // Medium: 30% chance to make a random move instead of the best one
+        if (gameState.difficulty === 'medium' && Math.random() < 0.3) {
+            const randomIndex = Math.floor(Math.random() * gameState.availableLines.length);
+            targetLineId = gameState.availableLines[randomIndex];
+        }
     }
 
     const line = document.getElementById(targetLineId);
     if (line) handleLineClick(line);
 }
 
-function findBoxCompletingLine() {
-    for (let r = 0; r < gameState.gridSize; r++) {
-        for (let c = 0; c < gameState.gridSize; c++) {
-            const lineIds = [
-                `line-horizontal-${r}-${c}`,
-                `line-horizontal-${r + 1}-${c}`,
-                `line-vertical-${r}-${c}`,
-                `line-vertical-${r}-${c + 1}`
-            ];
-            const drawnCount = lineIds.filter(id => {
-                const el = document.getElementById(id);
-                return el && el.classList.contains('drawn');
-            }).length;
-            if (drawnCount === 3) {
-                const missing = lineIds.find(id => {
-                    const el = document.getElementById(id);
-                    return el && !el.classList.contains('drawn');
-                });
-                if (missing) return missing;
+function getBestMove() {
+    // 0. Use Minimax for perfect play if the search space is small enough
+    // For 3x3 (24 lines) or endgame (last 10-12 lines), Minimax is feasible.
+    if (gameState.availableLines.length <= 10 || (gameState.gridSize === 3 && gameState.availableLines.length <= 14)) {
+        transpositionTable.clear();
+        let bestVal = -Infinity;
+        let bestMove = null;
+        
+        // Deep search
+        for (let lineId of gameState.availableLines) {
+            const oldTurn = gameState.currentTurn;
+            const won = simulateDraw(lineId);
+            let val;
+            if (won > 0) {
+                val = minimaxSearch(8, -Infinity, Infinity, true, new Set());
+            } else {
+                gameState.currentTurn = oldTurn === 1 ? 2 : 1;
+                val = minimaxSearch(8, -Infinity, Infinity, false, new Set());
+            }
+            undoSimulatedDraw(lineId, won, oldTurn);
+            
+            if (val > bestVal) {
+                bestVal = val;
+                bestMove = lineId;
             }
         }
+        if (bestMove) return bestMove;
+    }
+
+    // 1. Priority: Take ALL completing lines
+    const completingLine = findBoxCompletingLine();
+    if (completingLine) {
+        // If we're on Hard, check if we should "Double-Cross"
+        if (gameState.difficulty === 'hard') {
+            const chain = getChain(completingLine);
+            // If it's a long chain (>=3) and NOT the very last boxes of the game
+            // AND there are other chains left, we might double-cross
+            if (chain.length >= 3 && !isFinalChain(chain)) {
+                if (shouldDoubleCross(chain)) {
+                    return getDoubleCrossMove(chain);
+                }
+            }
+        }
+        return completingLine;
+    }
+
+    // 2. Priority: Take a "Safe" line (doesn't give a box)
+    const safeLines = gameState.availableLines.filter(id => !wouldGiveBox(id));
+    if (safeLines.length > 0) {
+        // Pick a safe line that doesn't create a move for the opponent to take a box
+        // On Hard, try to pick one that is "most safe"
+        return safeLines[Math.floor(Math.random() * safeLines.length)];
+    }
+
+    // 3. Priority: If forced to give a box, give the SHORTEST chain
+    return getShortestChainMove();
+}
+
+function findBoxCompletingLine() {
+    for (let id of gameState.availableLines) {
+        if (completesABox(id)) return id;
     }
     return null;
 }
 
-function findSafeLine() {
-    // Prefer lines that don't give opponent a box (not 3rd side of a box)
-    const safeMoves = gameState.availableLines.filter(id => !wouldGiveBox(id));
-    if (safeMoves.length > 0) {
-        return safeMoves[Math.floor(Math.random() * safeMoves.length)];
-    }
-    return null;
-}
-
-function wouldGiveBox(lineId) {
-    // Simulate drawing this line and check if it creates a 3-sided box for the opponent
+function completesABox(lineId) {
     const el = document.getElementById(lineId);
-    if (!el) return false;
     const r = parseInt(el.dataset.r);
     const c = parseInt(el.dataset.c);
     const isH = el.classList.contains('horizontal');
 
-    const boxesToCheck = [];
+    const boxes = [];
     if (isH) {
-        if (r > 0) boxesToCheck.push([r - 1, c]);
-        if (r < gameState.gridSize) boxesToCheck.push([r, c]);
+        if (r > 0) boxes.push([r - 1, c]);
+        if (r < gameState.gridSize) boxes.push([r, c]);
     } else {
-        if (c > 0) boxesToCheck.push([r, c - 1]);
-        if (c < gameState.gridSize) boxesToCheck.push([r, c]);
+        if (c > 0) boxes.push([r, c - 1]);
+        if (c < gameState.gridSize) boxes.push([r, c]);
     }
 
-    return boxesToCheck.some(([br, bc]) => {
-        const lineIds = [
-            `line-horizontal-${br}-${bc}`,
-            `line-horizontal-${br + 1}-${bc}`,
-            `line-vertical-${br}-${bc}`,
-            `line-vertical-${br}-${bc + 1}`
-        ];
-        const drawnCount = lineIds.filter(id => {
-            const el2 = document.getElementById(id);
-            return el2 && (el2.classList.contains('drawn') || el2.id === lineId);
+    return boxes.some(([br, bc]) => {
+        const sides = getBoxSides(br, bc);
+        const drawnCount = sides.filter(sid => {
+            const s = document.getElementById(sid);
+            return s && (s.classList.contains('drawn') || s.id === lineId);
         }).length;
-        // 3 sides already means giving this line completes the box
+        return drawnCount === 4;
+    });
+}
+
+function getBoxSides(r, c) {
+    return [
+        `line-horizontal-${r}-${c}`,
+        `line-horizontal-${r + 1}-${c}`,
+        `line-vertical-${r}-${c}`,
+        `line-vertical-${r}-${c + 1}`
+    ];
+}
+
+function wouldGiveBox(lineId) {
+    const el = document.getElementById(lineId);
+    const r = parseInt(el.dataset.r);
+    const c = parseInt(el.dataset.c);
+    const isH = el.classList.contains('horizontal');
+
+    const boxes = [];
+    if (isH) {
+        if (r > 0) boxes.push([r - 1, c]);
+        if (r < gameState.gridSize) boxes.push([r, c]);
+    } else {
+        if (c > 0) boxes.push([r, c - 1]);
+        if (c < gameState.gridSize) boxes.push([r, c]);
+    }
+
+    return boxes.some(([br, bc]) => {
+        const sides = getBoxSides(br, bc);
+        const drawnCount = sides.filter(sid => {
+            const s = document.getElementById(sid);
+            return s && (s.classList.contains('drawn') || s.id === lineId);
+        }).length;
         return drawnCount === 3;
     });
+}
+
+// Chain Analysis for Advanced Play
+function getChain(lineId) {
+    // Simplistic chain detection: sequence of boxes that can be taken consecutively
+    const chainLines = [];
+    const simulatedDrawn = new Set();
+    
+    let currentLine = lineId;
+    while (currentLine) {
+        chainLines.push(currentLine);
+        simulatedDrawn.add(currentLine);
+        
+        // After "drawing" this line, what other lines complete boxes?
+        currentLine = null;
+        for (let id of gameState.availableLines) {
+            if (simulatedDrawn.has(id)) continue;
+            if (completesABoxWithSim(id, simulatedDrawn)) {
+                currentLine = id;
+                break;
+            }
+        }
+    }
+    return chainLines;
+}
+
+function completesABoxWithSim(lineId, simDrawn) {
+    const el = document.getElementById(lineId);
+    const r = parseInt(el.dataset.r);
+    const c = parseInt(el.dataset.c);
+    const isH = el.classList.contains('horizontal');
+    const boxes = isH ? [[r-1,c],[r,c]] : [[r,c-1],[r,c]];
+
+    return boxes.some(([br, bc]) => {
+        if (br < 0 || br >= gameState.gridSize || bc < 0 || bc >= gameState.gridSize) return false;
+        const sides = getBoxSides(br, bc);
+        const drawnCount = sides.filter(sid => {
+            const s = document.getElementById(sid);
+            return s && (s.classList.contains('drawn') || simDrawn.has(sid) || sid === lineId);
+        }).length;
+        return drawnCount === 4;
+    });
+}
+
+function getShortestChainMove() {
+    const forcedMoves = gameState.availableLines;
+    const chainMap = forcedMoves.map(id => ({ id, length: getChain(id).length }));
+    chainMap.sort((a, b) => a.length - b.length);
+    return chainMap[0].id;
+}
+
+function isFinalChain(chain) {
+    const remainingAfterChain = gameState.availableLines.length - chain.length;
+    return remainingAfterChain === 0;
+}
+
+function shouldDoubleCross(chain) {
+    if (chain.length < 3) return false;
+    
+    // Expert Move: If taking a long chain, leave 2 boxes for the opponent
+    // This forces THEM to open the next chain, giving us control.
+    // Recommended when there are other chains (or just one other chain) left.
+    
+    const remainingLines = gameState.availableLines.filter(id => !chain.includes(id));
+    // If no lines left after this chain, don't double cross, just win.
+    if (remainingLines.length === 0) return false;
+
+    // Count how many "chains" are left. If multiple chains, double cross is good.
+    // For simplicity: if all remaining moves are "forced" (give a box), double cross.
+    const safeRemaining = remainingLines.filter(id => !wouldGiveBox(id));
+    if (safeRemaining.length > 0) return false;
+    
+    return true;
+}
+
+function getDoubleCrossMove(chain) {
+    // If we have >= 3 boxes in a chain, we take all but the last 2.
+    // The current 'completingLine' is the first box of the chain.
+    // If chain.length > 2, we just take the first box.
+    // If chain.length == 2, THIS is where we double-cross by drawing a non-completing line
+    // that still sacrifices the 2 boxes.
+    if (chain.length > 2) {
+        return chain[0];
+    }
+    
+    // Double-cross move for 2-box chain:
+    // Draw the line that separates the two boxes (if not drawn) OR a line that 
+    // makes them a single takeable block of 2 once the opponent moves.
+    // Simplest: just pick a random line that doesn't complete a box but gives these 2 away.
+    const sacrificingLine = chain.find(id => !completesABox(id));
+    return sacrificingLine || chain[0];
+}
+
+// Minimax for Perfect Play on Small Grids
+const transpositionTable = new Map();
+
+function minimaxSearch(depth, alpha, beta, isMaximizing, simDrawn) {
+    const stateKey = [...simDrawn].sort().join('|') + gameState.currentTurn;
+    if (transpositionTable.has(stateKey)) return transpositionTable.get(stateKey);
+
+    if (simDrawn.size === gameState.totalLines || depth === 0) {
+        return gameState.player2.score - gameState.player1.score;
+    }
+
+    let bestVal = isMaximizing ? -Infinity : Infinity;
+    const available = gameState.allLineIds.filter(id => !simDrawn.has(id));
+
+    for (let lineId of available) {
+        const oldTurn = gameState.currentTurn;
+        const boxesWon = getNewlyCompletedBoxesSim(lineId, simDrawn);
+        
+        simDrawn.add(lineId);
+        gameState[`player${gameState.currentTurn}`].score += boxesWon;
+        
+        let val;
+        if (boxesWon > 0) {
+            val = minimaxSearch(depth - 1, alpha, beta, isMaximizing, simDrawn);
+        } else {
+            gameState.currentTurn = oldTurn === 1 ? 2 : 1;
+            val = minimaxSearch(depth - 1, alpha, beta, !isMaximizing, simDrawn);
+        }
+
+        // Undo
+        simDrawn.delete(lineId);
+        gameState[`player${gameState.currentTurn}`].score -= boxesWon;
+        gameState.currentTurn = oldTurn;
+
+        if (isMaximizing) {
+            bestVal = Math.max(bestVal, val);
+            alpha = Math.max(alpha, val);
+        } else {
+            bestVal = Math.min(bestVal, val);
+            beta = Math.min(beta, val);
+        }
+        if (beta <= alpha) break;
+    }
+
+    transpositionTable.set(stateKey, bestVal);
+    return bestVal;
+}
+
+function getNewlyCompletedBoxesSim(lineId, simDrawn) {
+    const parts = lineId.split('-');
+    const type = parts[1];
+    const r = parseInt(parts[2]);
+    const c = parseInt(parts[3]);
+    const boxes = (type === 'horizontal') ? [[r-1,c],[r,c]] : [[r,c-1],[r,c]];
+
+    let count = 0;
+    for (let [br, bc] of boxes) {
+        if (br >= 0 && br < gameState.gridSize && bc >= 0 && bc < gameState.gridSize) {
+            const sides = getBoxSides(br, bc);
+            if (sides.every(sid => sid === lineId || simIsDrawn(sid, simDrawn))) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+function simIsDrawn(lineId, simDrawn) {
+    if (simDrawn.has(lineId)) return true;
+    const el = document.getElementById(lineId);
+    return el && el.classList.contains('drawn');
 }
 
 // Win State
