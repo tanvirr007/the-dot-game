@@ -496,8 +496,6 @@ function getBestMove() {
         // If we're on Hard, check if we should "Double-Cross"
         if (gameState.difficulty === 'hard') {
             const chain = getChain(completingLine);
-            // If it's a long chain (>=3) and NOT the very last boxes of the game
-            // AND there are other chains left, we might double-cross
             if (chain.length >= 3 && !isFinalChain(chain)) {
                 if (shouldDoubleCross(chain)) {
                     return getDoubleCrossMove(chain);
@@ -510,13 +508,36 @@ function getBestMove() {
     // 2. Priority: Take a "Safe" line (doesn't give a box)
     const safeLines = gameState.availableLines.filter(id => !wouldGiveBox(id));
     if (safeLines.length > 0) {
-        // Pick a safe line that doesn't create a move for the opponent to take a box
-        // On Hard, try to pick one that is "most safe"
-        return safeLines[Math.floor(Math.random() * safeLines.length)];
+        // Strategic Improvement: Prefer "Quiet" safe moves
+        // A quiet move is one that doesn't create a box with 2 sides already drawn
+        const quietLines = safeLines.filter(id => {
+            const boxes = getBoxesForLine(id);
+            return boxes.every(([br, bc]) => {
+                const sides = getBoxSides(br, bc);
+                const drawnCount = sides.filter(sid => {
+                    const s = document.getElementById(sid);
+                    return s && (s.classList.contains('drawn') || s.id === id);
+                }).length;
+                return drawnCount <= 2; // If drawing this makes 3, it's not quiet (it would give a box next turn)
+                // Actually, drawnCount here includes the line itself. 
+                // So drawnCount <= 2 means 1 or 2 sides will be drawn.
+            });
+        });
+
+        const targetPool = (quietLines.length > 0 && gameState.difficulty === 'hard') ? quietLines : safeLines;
+        return targetPool[Math.floor(Math.random() * targetPool.length)];
     }
 
     // 3. Priority: If forced to give a box, give the SHORTEST chain
     return getShortestChainMove();
+}
+
+function getBoxesForLine(lineId) {
+    const parts = lineId.split('-');
+    const type = parts[1];
+    const r = parseInt(parts[2]);
+    const c = parseInt(parts[3]);
+    return (type === 'horizontal') ? [[r - 1, c], [r, c]] : [[r, c - 1], [r, c]];
 }
 
 function findBoxCompletingLine() {
@@ -680,15 +701,15 @@ function getDoubleCrossMove(chain) {
 const transpositionTable = new Map();
 
 function minimaxSearch(depth, alpha, beta, isMaximizing, simDrawn) {
-    // Optimization: Use a faster state representation
-    const stateKey = `${simDrawn.size}-${isMaximizing}-${gameState.currentTurn}`;
-    // Focus key on the actual drawn lines state for small grids only, or use a partial key for larger ones
-    const fullKey = gameState.gridSize === 3 ? [...simDrawn].sort().join('') + isMaximizing : stateKey;
+    // Optimization: Use a bitmask or unique string for state tracking
+    const stateKey = getBitmaskKey(simDrawn);
+    const fullKey = `${stateKey}-${isMaximizing}-${gameState.currentTurn}`;
 
     if (transpositionTable.has(fullKey)) return transpositionTable.get(fullKey);
 
-    if (simDrawn.size + (gameState.totalLines - gameState.availableLines.length) === gameState.totalLines || depth === 0) {
-        return gameState.player2.score - gameState.player1.score;
+    const totalDrawnCount = simDrawn.size + (gameState.totalLines - gameState.availableLines.length);
+    if (totalDrawnCount === gameState.totalLines || depth === 0) {
+        return (gameState.player2.score - gameState.player1.score) * 100;
     }
 
     let bestVal = isMaximizing ? -Infinity : Infinity;
@@ -746,6 +767,21 @@ function getNewlyCompletedBoxesSim(lineId, simDrawn) {
         }
     }
     return count;
+}
+
+function getBitmaskKey(simDrawn) {
+    // Since we have up to ~84 lines (6x6), we can't use a single integer bitmask.
+    // Instead, we'll use a string of 0/1 for all line indices to ensure perfect tracking.
+    let key = "";
+    for (let i = 0; i < gameState.allLineIds.length; i++) {
+        const id = gameState.allLineIds[i];
+        if (gameState.drawnLines.has(id) || simDrawn.has(id)) {
+            key += "1";
+        } else {
+            key += "0";
+        }
+    }
+    return key;
 }
 
 
