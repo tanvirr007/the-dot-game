@@ -5,6 +5,7 @@ let gameState = {
     player1: { name: 'Player 1', score: 0 },
     player2: { name: 'Player 2', score: 0 },
     currentTurn: 1,    // 1 or 2
+    startingPlayer: 1, // 1 or 2 (for PVC mode)
     gridSize: 3,       // Default 3x3 grid
     totalBoxes: 16,
     filledBoxes: 0,
@@ -94,10 +95,9 @@ function setMode(mode) {
     if (mode === 'pvc') {
         pvcOptions.classList.remove('hidden');
         gameState.player2.name = 'Computer';
-        // Recalculate slider for difficulty buttons since they were hidden on load
+        // Recalculate slider for all active buttons in pvcOptions since they were hidden on load
         setTimeout(() => {
-            const activeDiff = pvcOptions.querySelector('.active');
-            if (activeDiff) updateSlider(activeDiff);
+            pvcOptions.querySelectorAll('.active').forEach(activeBtn => updateSlider(activeBtn));
         }, 10);
     } else {
         pvcOptions.classList.add('hidden');
@@ -111,6 +111,15 @@ function setDiff(diff) {
     gameState.difficulty = diff;
     document.querySelectorAll('#diff-easy, #diff-medium, #diff-hard').forEach(btn => btn.classList.remove('active'));
     const btn = document.getElementById(`diff-${diff}`);
+    btn.classList.add('active');
+    updateSlider(btn);
+}
+
+function setStartingPlayer(player) {
+    vibrate(20);
+    gameState.startingPlayer = player;
+    document.querySelectorAll('#start-p1, #start-p2').forEach(btn => btn.classList.remove('active'));
+    const btn = document.getElementById(`start-p${player}`);
     btn.classList.add('active');
     updateSlider(btn);
 }
@@ -137,7 +146,7 @@ function startGame() {
     gameState.filledBoxes = 0;
     gameState.player1.score = 0;
     gameState.player2.score = 0;
-    gameState.currentTurn = 1;
+    gameState.currentTurn = gameState.mode === 'pvc' ? gameState.startingPlayer : 1;
     gameState.gameOver = false;
     gameState.availableLines = [];
 

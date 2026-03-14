@@ -110,6 +110,14 @@ body {
     color: var(--text-main);
 }
 
+.setup-subgroup {
+    margin-bottom: 20px;
+}
+
+.setup-subgroup:last-child {
+    margin-bottom: 0;
+}
+
 .toggle-group {
     position: relative;
     display: flex;
