@@ -288,12 +288,15 @@ function setProcessing(val) {
 }
 
 function handleLineClick(line, isManual = false) {
-    if (gameState.gameOver || gameState.isProcessing || gameState.drawnLines.has(line.id)) return;
+    if (gameState.gameOver || gameState.drawnLines.has(line.id)) return;
     
-    // Guard: Prevent manual moves during AI turn
-    if (isManual && gameState.mode === 'pvc' && gameState.currentTurn === 2) return;
+    // Guard: Prevent manual moves during AI turn or while board is explicitly locked
+    if (isManual && (gameState.isProcessing || (gameState.mode === 'pvc' && gameState.currentTurn === 2))) return;
 
-    setProcessing(true);
+    if (isManual) {
+        // Coarse lock during the processing of a single move click
+        gameState.isProcessing = true;
+    }
 
     try {
         vibrate(15);
@@ -306,13 +309,17 @@ function handleLineClick(line, isManual = false) {
 
             // Bonus turn — stay as current player
             if (gameState.mode === 'pvc' && gameState.currentTurn === 2) {
+                // Keep board locked during AI thinking gap
+                setProcessing(true);
                 setTimeout(computerMove, 600);
             }
         } else {
             switchTurn();
         }
     } finally {
-        setProcessing(false);
+        if (isManual) {
+            gameState.isProcessing = false;
+        }
     }
 }
 
@@ -380,8 +387,12 @@ function switchTurn() {
     updateScoreboard();
 
     if (gameState.mode === 'pvc' && gameState.currentTurn === 2) {
-        setProcessing(true); // Lock board during AI "thinking" delay
+        // UI lock for AI thinking
+        setProcessing(true);
         setTimeout(computerMove, 600);
+    } else if (gameState.mode === 'pvc' && gameState.currentTurn === 1) {
+        // Ensure UI is unlocked for human turn
+        setProcessing(false);
     }
 }
 
@@ -400,8 +411,14 @@ function updateScoreboardNames() {
 
 // AI Logic
 function computerMove() {
-    if (gameState.gameOver || gameState.currentTurn !== 2) return;
-    if (gameState.availableLines.length === 0) return;
+    if (gameState.gameOver || gameState.currentTurn !== 2) {
+        setProcessing(false);
+        return;
+    }
+    if (gameState.availableLines.length === 0) {
+        setProcessing(false);
+        return;
+    }
 
     let targetLineId = null;
 
@@ -424,7 +441,13 @@ function computerMove() {
     }
 
     const line = document.getElementById(targetLineId);
-    if (line) handleLineClick(line);
+    if (line) {
+        // If AI made a move, processing will be handled by handleLineClick
+        handleLineClick(line, false);
+    } else {
+        // Fallback safety
+        setProcessing(false);
+    }
 }
 
 function getBestMove() {
@@ -659,7 +682,8 @@ const transpositionTable = new Map();
 function minimaxSearch(depth, alpha, beta, isMaximizing, simDrawn) {
     // Optimization: Use a faster state representation
     const stateKey = `${simDrawn.size}-${isMaximizing}-${gameState.currentTurn}`;
-    const fullKey = gameState.gridSize <= 3 ? [...simDrawn].sort().join('') + isMaximizing : stateKey;
+    // Focus key on the actual drawn lines state for small grids only, or use a partial key for larger ones
+    const fullKey = gameState.gridSize === 3 ? [...simDrawn].sort().join('') + isMaximizing : stateKey;
 
     if (transpositionTable.has(fullKey)) return transpositionTable.get(fullKey);
 
