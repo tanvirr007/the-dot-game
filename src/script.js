@@ -314,9 +314,12 @@ function fillBox(r, c) {
 
     box.classList.add('filled', `filled-p${gameState.currentTurn}`);
     
-    // Show A for Player 1, B for Player 2
-    const initial = gameState.currentTurn === 1 ? 'A' : 'B';
-    box.querySelector('.box-word').textContent = initial;
+    // Set initials: P1, P2, or AI
+    let text = 'P1';
+    if (gameState.currentTurn === 2) {
+        text = gameState.mode === 'pvc' ? 'AI' : 'P2';
+    }
+    box.querySelector('.box-word').textContent = text;
     
     gameState.filledBoxes++;
     vibrate([30, 30, 30]);
