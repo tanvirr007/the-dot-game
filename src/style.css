@@ -99,6 +99,7 @@ body {
 }
 
 .toggle-group {
+    position: relative;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -108,7 +109,18 @@ body {
     gap: 4px;
 }
 
+.slider {
+    position: absolute;
+    background: var(--text-main);
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 0;
+}
+
 .toggle-btn {
+    position: relative;
+    z-index: 1;
     flex: 1;
     min-width: 60px;
     border: none;
@@ -119,12 +131,12 @@ body {
     cursor: pointer;
     font-family: inherit;
     font-weight: 600;
-    transition: all var(--transition-speed);
+    transition: color var(--transition-speed);
     font-size: 1rem;
 }
 
 .toggle-btn.active {
-    background: var(--text-main);
+    background: transparent;
     color: var(--primary-bg);
 }
 

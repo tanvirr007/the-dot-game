@@ -26,6 +26,7 @@ const gameBoard = document.getElementById('game-board');
 // Initialize
 function init() {
     setupEventListeners();
+    initSliders();
 }
 
 function setupEventListeners() {
@@ -33,6 +34,34 @@ function setupEventListeners() {
     document.getElementById('quit-btn').addEventListener('click', () => { vibrate(20); quitGame(); });
     document.getElementById('rematch-btn').addEventListener('click', () => { vibrate(20); rematch(); });
     document.getElementById('new-game-btn').addEventListener('click', () => { vibrate(20); quitGame(); });
+}
+
+function initSliders() {
+    document.querySelectorAll('.toggle-group').forEach(group => {
+        const slider = document.createElement('div');
+        slider.className = 'slider';
+        group.insertBefore(slider, group.firstChild);
+        
+        // Initial setup
+        const activeBtn = group.querySelector('.active');
+        if (activeBtn) setTimeout(() => updateSlider(activeBtn), 50);
+    });
+
+    window.addEventListener('resize', () => {
+        document.querySelectorAll('.toggle-group .active').forEach(activeBtn => updateSlider(activeBtn));
+    });
+}
+
+function updateSlider(btn) {
+    if (!btn) return;
+    const group = btn.parentElement;
+    const slider = group.querySelector('.slider');
+    if (slider) {
+        slider.style.width = `${btn.offsetWidth}px`;
+        slider.style.height = `${btn.offsetHeight}px`;
+        slider.style.left = `${btn.offsetLeft}px`;
+        slider.style.top = `${btn.offsetTop}px`;
+    }
 }
 
 // UI Handlers
@@ -46,14 +75,18 @@ function setSize(size) {
     vibrate(20);
     gameState.gridSize = size;
     document.querySelectorAll('#size-3, #size-4, #size-5, #size-6').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`size-${size}`).classList.add('active');
+    const btn = document.getElementById(`size-${size}`);
+    btn.classList.add('active');
+    updateSlider(btn);
 }
 
 function setMode(mode) {
     vibrate(20);
     gameState.mode = mode;
     document.querySelectorAll('#mode-1v1, #mode-pvc').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`mode-${mode}`).classList.add('active');
+    const btn = document.getElementById(`mode-${mode}`);
+    btn.classList.add('active');
+    updateSlider(btn);
 
     if (mode === 'pvc') {
         pvcOptions.classList.remove('hidden');
@@ -69,7 +102,9 @@ function setDiff(diff) {
     vibrate(20);
     gameState.difficulty = diff;
     document.querySelectorAll('#diff-easy, #diff-medium, #diff-hard').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`diff-${diff}`).classList.add('active');
+    const btn = document.getElementById(`diff-${diff}`);
+    btn.classList.add('active');
+    updateSlider(btn);
 }
 
 function showScreen(screenId) {
