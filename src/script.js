@@ -30,13 +30,20 @@ function init() {
 
 function setupEventListeners() {
     startBtn.addEventListener('click', startGame);
-    document.getElementById('quit-btn').addEventListener('click', quitGame);
-    document.getElementById('rematch-btn').addEventListener('click', rematch);
-    document.getElementById('new-game-btn').addEventListener('click', quitGame);
+    document.getElementById('quit-btn').addEventListener('click', () => { vibrate(20); quitGame(); });
+    document.getElementById('rematch-btn').addEventListener('click', () => { vibrate(20); rematch(); });
+    document.getElementById('new-game-btn').addEventListener('click', () => { vibrate(20); quitGame(); });
 }
 
 // UI Handlers
+function vibrate(pattern) {
+    if (navigator.vibrate) {
+        navigator.vibrate(pattern);
+    }
+}
+
 function setMode(mode) {
+    vibrate(20);
     gameState.mode = mode;
     document.querySelectorAll('#mode-1v1, #mode-pvc').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`mode-${mode}`).classList.add('active');
@@ -52,6 +59,7 @@ function setMode(mode) {
 }
 
 function setDiff(diff) {
+    vibrate(20);
     gameState.difficulty = diff;
     document.querySelectorAll('#diff-easy, #diff-medium').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`diff-${diff}`).classList.add('active');
@@ -83,6 +91,8 @@ function startGame() {
     gameState.currentTurn = 1;
     gameState.gameOver = false;
     gameState.availableLines = [];
+
+    vibrate(30);
 
     // Show game screen FIRST so board-container has a real clientWidth
     showScreen('game');
@@ -197,6 +207,7 @@ function createLine(r, c, type, spacing, dotSize) {
 function handleLineClick(line) {
     if (line.classList.contains('drawn') || gameState.gameOver) return;
 
+    vibrate(15);
     drawLine(line);
     const boxesCompleted = checkBoxes(line);
 
@@ -260,6 +271,7 @@ function fillBox(r, c) {
     box.querySelector('.box-word').textContent = initial;
     
     gameState.filledBoxes++;
+    vibrate([30, 30, 30]);
 }
 
 function updateScore(points) {
@@ -405,12 +417,15 @@ function showResults() {
     if (gameState.player1.score > gameState.player2.score) {
         winnerText.textContent = `${gameState.player1.name} Wins! 🎉`;
         winnerText.style.color = 'var(--accent-p1)';
+        vibrate([50, 50, 100]);
     } else if (gameState.player2.score > gameState.player1.score) {
         winnerText.textContent = `${gameState.player2.name} Wins! 🎉`;
         winnerText.style.color = 'var(--accent-p2)';
+        vibrate([50, 50, 100]);
     } else {
         winnerText.textContent = "It's a Tie! 🤝";
         winnerText.style.color = 'var(--text-main)';
+        vibrate([30, 30, 30, 30]);
     }
 
     showScreen('results');
