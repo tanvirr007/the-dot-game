@@ -1,5 +1,5 @@
 // Cache version — bump this string to bust the cache on next deploy
-const CACHE_VERSION = 'v1.0.9';
+const CACHE_VERSION = 'v1.0.10';
 const CACHE_NAME = `dot-game-${CACHE_VERSION}`;
 
 // Files to pre-cache on install

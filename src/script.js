@@ -91,6 +91,11 @@ function setMode(mode) {
     if (mode === 'pvc') {
         pvcOptions.classList.remove('hidden');
         gameState.player2.name = 'Computer';
+        // Recalculate slider for difficulty buttons since they were hidden on load
+        setTimeout(() => {
+            const activeDiff = pvcOptions.querySelector('.active');
+            if (activeDiff) updateSlider(activeDiff);
+        }, 10);
     } else {
         pvcOptions.classList.add('hidden');
         gameState.player2.name = 'Player 2';
