@@ -16,7 +16,8 @@ let gameState = {
 const screens = {
     setup: document.getElementById('setup-menu'),
     game: document.getElementById('game-screen'),
-    results: document.getElementById('results-screen')
+    results: document.getElementById('results-screen'),
+    quitModal: document.getElementById('quit-modal')
 };
 
 const startBtn = document.getElementById('start-btn');
@@ -31,7 +32,9 @@ function init() {
 
 function setupEventListeners() {
     startBtn.addEventListener('click', startGame);
-    document.getElementById('quit-btn').addEventListener('click', () => { vibrate(20); quitGame(); });
+    document.getElementById('quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.remove('hidden'); });
+    document.getElementById('confirm-quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.add('hidden'); quitGame(); });
+    document.getElementById('cancel-quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.add('hidden'); });
     document.getElementById('rematch-btn').addEventListener('click', () => { vibrate(20); rematch(); });
     document.getElementById('new-game-btn').addEventListener('click', () => { vibrate(20); quitGame(); });
 }

@@ -78,7 +78,7 @@
             </div>
 
             <div class="game-controls">
-                <button id="quit-btn" class="secondary-btn">Quit Game</button>
+                <button id="quit-btn" class="secondary-btn">Exit</button>
             </div>
         </section>
 
@@ -105,6 +105,18 @@
                 </div>
             </div>
         </section>
+
+        <!-- Confirmation Modal -->
+        <div id="quit-modal" class="modal-overlay hidden">
+            <div class="modal-card glass-card">
+                <h2 class="modal-title">Quit Match?</h2>
+                <p class="modal-text">Are you sure?</p>
+                <div class="button-row">
+                    <button id="confirm-quit-btn" class="primary-btn">Yes</button>
+                    <button id="cancel-quit-btn" class="secondary-btn">No</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="src/script.js"></script>
