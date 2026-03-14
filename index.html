@@ -25,6 +25,16 @@
                 <p class="subtitle">Classic Dots and Boxes</p>
 
                 <div class="setup-group">
+                    <label>Grid Size</label>
+                    <div class="toggle-group">
+                        <button id="size-3" class="toggle-btn" onclick="setSize(3)">3x3</button>
+                        <button id="size-4" class="toggle-btn active" onclick="setSize(4)">4x4</button>
+                        <button id="size-5" class="toggle-btn" onclick="setSize(5)">5x5</button>
+                        <button id="size-6" class="toggle-btn" onclick="setSize(6)">6x6</button>
+                    </div>
+                </div>
+
+                <div class="setup-group">
                     <label>Game Mode</label>
                     <div class="toggle-group">
                         <button id="mode-1v1" class="toggle-btn active" onclick="setMode('1v1')">1 vs 1</button>

@@ -5,8 +5,8 @@ let gameState = {
     player1: { name: 'Player 1', score: 0 },
     player2: { name: 'Player 2', score: 0 },
     currentTurn: 1,    // 1 or 2
-    gridSize: 3,       // Fixed 3x3 grid
-    totalBoxes: 9,
+    gridSize: 4,       // Default 4x4 grid
+    totalBoxes: 16,
     filledBoxes: 0,
     availableLines: [],
     gameOver: false
@@ -40,6 +40,13 @@ function vibrate(pattern) {
     if (navigator.vibrate) {
         navigator.vibrate(pattern);
     }
+}
+
+function setSize(size) {
+    vibrate(20);
+    gameState.gridSize = size;
+    document.querySelectorAll('#size-3, #size-4, #size-5, #size-6').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`size-${size}`).classList.add('active');
 }
 
 function setMode(mode) {
@@ -83,8 +90,7 @@ function quitGame() {
 
 // Game Logic
 function startGame() {
-    gameState.gridSize = 3;
-    gameState.totalBoxes = 9;
+    gameState.totalBoxes = gameState.gridSize * gameState.gridSize;
     gameState.filledBoxes = 0;
     gameState.player1.score = 0;
     gameState.player2.score = 0;
@@ -115,8 +121,8 @@ function getSpacing() {
     const availableWidth = container.clientWidth || 300;
     // Subtract some padding and compute per-cell spacing
     const spacing = Math.floor((availableWidth - 24) / gameState.gridSize);
-    // Clamp between 55px (tiny phone) and 90px (desktop)
-    return Math.max(55, Math.min(spacing, 90));
+    // Clamp between 30px (tiny phone large grid) and 90px (desktop)
+    return Math.max(35, Math.min(spacing, 90));
 }
 
 function createBoard() {
@@ -169,6 +175,8 @@ function createBoard() {
 
             const numEl = document.createElement('span');
             numEl.className = 'box-word';
+            // Scale font size based on spacing so large grids fit inside boxes
+            numEl.style.fontSize = `${Math.min(0.9, spacing / 60)}rem`;
             box.appendChild(numEl);
 
             gameBoard.appendChild(box);
