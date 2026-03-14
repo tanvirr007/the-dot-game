@@ -10,7 +10,8 @@ let gameState = {
     totalBoxes: 16,
     filledBoxes: 0,
     availableLines: [],
-    gameOver: false
+    gameOver: false,
+    isProcessing: false
 };
 
 // DOM Elements
@@ -259,19 +260,24 @@ function createLine(r, c, type, spacing, dotSize) {
         line.style.top    = `${r * spacing + dotSize / 2 + 6}px`;
     }
 
-    line.addEventListener('click', () => handleLineClick(line));
+    line.addEventListener('click', () => handleLineClick(line, true));
     // Touch support for mobile
     line.addEventListener('touchend', (e) => {
         e.preventDefault();
-        handleLineClick(line);
+        handleLineClick(line, true);
     }, { passive: false });
 
     gameBoard.appendChild(line);
     gameState.availableLines.push(line.id);
 }
 
-function handleLineClick(line) {
-    if (line.classList.contains('drawn') || gameState.gameOver) return;
+function handleLineClick(line, isManual = false) {
+    if (gameState.gameOver || gameState.isProcessing || line.classList.contains('drawn')) return;
+    
+    // Guard: Prevent manual moves during AI turn
+    if (isManual && gameState.mode === 'pvc' && gameState.currentTurn === 2) return;
+
+    gameState.isProcessing = true;
 
     vibrate(15);
     drawLine(line);
@@ -288,6 +294,8 @@ function handleLineClick(line) {
     } else {
         switchTurn();
     }
+    
+    gameState.isProcessing = false;
 }
 
 function drawLine(line) {
