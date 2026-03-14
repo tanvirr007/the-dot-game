@@ -544,3 +544,21 @@ body {
         margin: 15px 0;
     }
 }
+/* Footer Credits */
+.credits {
+    margin-top: 16px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+}
+
+.credits a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.credits a:hover {
+    color: #fff;
+}
