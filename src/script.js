@@ -5,7 +5,7 @@ let gameState = {
     player1: { name: 'Player 1', score: 0 },
     player2: { name: 'Player 2', score: 0 },
     currentTurn: 1,    // 1 or 2
-    gridSize: 4,       // Default 4x4 grid
+    gridSize: 3,       // Default 3x3 grid
     totalBoxes: 16,
     filledBoxes: 0,
     availableLines: [],
