@@ -187,6 +187,12 @@ function createBoard() {
     gameBoard.style.width  = `${boardPx}px`;
     gameBoard.style.height = `${boardPx}px`;
 
+    // Dynamic Scoreboard Sizing
+    const scoreboard = document.querySelector('.scoreboard');
+    if (scoreboard) {
+        scoreboard.style.width = `${boardPx}px`;
+    }
+
     // Create dots
     for (let r = 0; r <= size; r++) {
         for (let c = 0; c <= size; c++) {

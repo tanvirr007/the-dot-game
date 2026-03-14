@@ -227,6 +227,8 @@ body {
     justify-content: center;
     align-items: center;
     gap: 15px;
+    margin: 0 auto;
+    transition: width 0.3s ease;
 }
 
 .score-card {
