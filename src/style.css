@@ -666,3 +666,8 @@ body {
 .modal-card .button-row {
     margin-top: 20px;
 }
+
+#board-container.disabled-board {
+    pointer-events: none;
+    cursor: wait;
+}

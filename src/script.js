@@ -10,6 +10,7 @@ let gameState = {
     totalBoxes: 16,
     filledBoxes: 0,
     availableLines: [],
+    drawnLines: new Set(),
     gameOver: false,
     isProcessing: false
 };
@@ -136,7 +137,7 @@ function quitGame() {
     gameState.player2.score = 0;
     gameState.filledBoxes = 0;
     gameState.currentTurn = 1;
-    gameState.gameOver = false;
+    gameState.isProcessing = false; // Reset lock
     showScreen('setup');
     updateScoreboard();
 }
@@ -149,6 +150,7 @@ function startGame() {
     gameState.player2.score = 0;
     gameState.currentTurn = gameState.mode === 'pvc' ? gameState.startingPlayer : 1;
     gameState.gameOver = false;
+    gameState.isProcessing = false; // Safety reset
     gameState.availableLines = [];
     gameState.allLineIds = [];
     gameState.totalLines = 0;
@@ -163,7 +165,9 @@ function startGame() {
     // Build board after layout paint so clientWidth is accurate
     requestAnimationFrame(() => {
         createBoard();
-        // Trigger AI if pvc mode starts with AI turn (it shouldn't, but safety)
+        gameState.drawnLines.clear();
+        setProcessing(false);
+        // Trigger AI if pvc mode starts with AI turn
         if (gameState.mode === 'pvc' && gameState.currentTurn === 2) {
             setTimeout(computerMove, 600);
         }
@@ -275,35 +279,46 @@ function createLine(r, c, type, spacing, dotSize) {
     gameState.totalLines++;
 }
 
+function setProcessing(val) {
+    gameState.isProcessing = val;
+    const container = document.getElementById('board-container');
+    if (container) {
+        container.classList.toggle('disabled-board', val || (gameState.mode === 'pvc' && gameState.currentTurn === 2));
+    }
+}
+
 function handleLineClick(line, isManual = false) {
-    if (gameState.gameOver || gameState.isProcessing || line.classList.contains('drawn')) return;
+    if (gameState.gameOver || gameState.isProcessing || gameState.drawnLines.has(line.id)) return;
     
     // Guard: Prevent manual moves during AI turn
     if (isManual && gameState.mode === 'pvc' && gameState.currentTurn === 2) return;
 
-    gameState.isProcessing = true;
+    setProcessing(true);
 
-    vibrate(15);
-    drawLine(line);
-    const boxesCompleted = checkBoxes(line);
+    try {
+        vibrate(15);
+        drawLine(line);
+        const boxesCompleted = checkBoxes(line);
 
-    if (boxesCompleted > 0) {
-        updateScore(boxesCompleted);
-        if (checkGameOver()) return;
+        if (boxesCompleted > 0) {
+            updateScore(boxesCompleted);
+            if (checkGameOver()) return;
 
-        // Bonus turn — stay as current player
-        if (gameState.mode === 'pvc' && gameState.currentTurn === 2) {
-            setTimeout(computerMove, 600);
+            // Bonus turn — stay as current player
+            if (gameState.mode === 'pvc' && gameState.currentTurn === 2) {
+                setTimeout(computerMove, 600);
+            }
+        } else {
+            switchTurn();
         }
-    } else {
-        switchTurn();
+    } finally {
+        setProcessing(false);
     }
-    
-    gameState.isProcessing = false;
 }
 
 function drawLine(line) {
     line.classList.add('drawn', `drawn-p${gameState.currentTurn}`);
+    gameState.drawnLines.add(line.id);
     gameState.availableLines = gameState.availableLines.filter(id => id !== line.id);
 }
 
@@ -365,6 +380,7 @@ function switchTurn() {
     updateScoreboard();
 
     if (gameState.mode === 'pvc' && gameState.currentTurn === 2) {
+        setProcessing(true); // Lock board during AI "thinking" delay
         setTimeout(computerMove, 600);
     }
 }
@@ -413,24 +429,35 @@ function computerMove() {
 
 function getBestMove() {
     // 0. Use Minimax for perfect play if the search space is small enough
-    // For 3x3 (24 lines) or endgame (last 10-12 lines), Minimax is feasible.
-    if (gameState.availableLines.length <= 10 || (gameState.gridSize === 3 && gameState.availableLines.length <= 14)) {
+    if (gameState.availableLines.length <= 10 || (gameState.gridSize === 3 && gameState.availableLines.length <= 15)) {
         transpositionTable.clear();
         let bestVal = -Infinity;
         let bestMove = null;
         
-        // Deep search
+        const simDrawn = new Set();
+        // Depth-limited search for performance
+        const searchDepth = gameState.availableLines.length > 12 ? 6 : 8;
+
         for (let lineId of gameState.availableLines) {
             const oldTurn = gameState.currentTurn;
-            const won = simulateDraw(lineId);
+            const won = getNewlyCompletedBoxesSim(lineId, simDrawn);
+            
+            simDrawn.add(lineId);
+            gameState[`player${gameState.currentTurn}`].score += won;
+            
             let val;
             if (won > 0) {
-                val = minimaxSearch(8, -Infinity, Infinity, true, new Set());
+                // Same player gets another turn
+                val = minimaxSearch(searchDepth, -Infinity, Infinity, true, simDrawn);
             } else {
                 gameState.currentTurn = oldTurn === 1 ? 2 : 1;
-                val = minimaxSearch(8, -Infinity, Infinity, false, new Set());
+                val = minimaxSearch(searchDepth, -Infinity, Infinity, false, simDrawn);
             }
-            undoSimulatedDraw(lineId, won, oldTurn);
+            
+            // Undo
+            simDrawn.delete(lineId);
+            gameState[`player${gameState.currentTurn}`].score -= won;
+            gameState.currentTurn = oldTurn;
             
             if (val > bestVal) {
                 bestVal = val;
@@ -630,15 +657,19 @@ function getDoubleCrossMove(chain) {
 const transpositionTable = new Map();
 
 function minimaxSearch(depth, alpha, beta, isMaximizing, simDrawn) {
-    const stateKey = [...simDrawn].sort().join('|') + gameState.currentTurn;
-    if (transpositionTable.has(stateKey)) return transpositionTable.get(stateKey);
+    // Optimization: Use a faster state representation
+    const stateKey = `${simDrawn.size}-${isMaximizing}-${gameState.currentTurn}`;
+    const fullKey = gameState.gridSize <= 3 ? [...simDrawn].sort().join('') + isMaximizing : stateKey;
 
-    if (simDrawn.size === gameState.totalLines || depth === 0) {
+    if (transpositionTable.has(fullKey)) return transpositionTable.get(fullKey);
+
+    if (simDrawn.size + (gameState.totalLines - gameState.availableLines.length) === gameState.totalLines || depth === 0) {
         return gameState.player2.score - gameState.player1.score;
     }
 
     let bestVal = isMaximizing ? -Infinity : Infinity;
-    const available = gameState.allLineIds.filter(id => !simDrawn.has(id));
+    // CRITICAL FIX: Only consider lines that are truly available
+    const available = gameState.availableLines.filter(id => !simDrawn.has(id));
 
     for (let lineId of available) {
         const oldTurn = gameState.currentTurn;
@@ -670,7 +701,7 @@ function minimaxSearch(depth, alpha, beta, isMaximizing, simDrawn) {
         if (beta <= alpha) break;
     }
 
-    transpositionTable.set(stateKey, bestVal);
+    transpositionTable.set(fullKey, bestVal);
     return bestVal;
 }
 
@@ -685,7 +716,7 @@ function getNewlyCompletedBoxesSim(lineId, simDrawn) {
     for (let [br, bc] of boxes) {
         if (br >= 0 && br < gameState.gridSize && bc >= 0 && bc < gameState.gridSize) {
             const sides = getBoxSides(br, bc);
-            if (sides.every(sid => sid === lineId || simIsDrawn(sid, simDrawn))) {
+            if (sides.every(sid => sid === lineId || simDrawn.has(sid) || gameState.drawnLines.has(sid))) {
                 count++;
             }
         }
@@ -693,11 +724,6 @@ function getNewlyCompletedBoxesSim(lineId, simDrawn) {
     return count;
 }
 
-function simIsDrawn(lineId, simDrawn) {
-    if (simDrawn.has(lineId)) return true;
-    const el = document.getElementById(lineId);
-    return el && el.classList.contains('drawn');
-}
 
 // Win State
 function checkGameOver() {
