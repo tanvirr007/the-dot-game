@@ -432,15 +432,15 @@ function showResults() {
     if (p2NameEl) p2NameEl.textContent = gameState.player2.name;
 
     if (gameState.player1.score > gameState.player2.score) {
-        winnerText.textContent = `${gameState.player1.name} Wins! 🎉`;
+        winnerText.textContent = `${gameState.player1.name} Wins!`;
         winnerText.style.color = 'var(--accent-p1)';
         vibrate([50, 50, 100]);
     } else if (gameState.player2.score > gameState.player1.score) {
-        winnerText.textContent = `${gameState.player2.name} Wins! 🎉`;
+        winnerText.textContent = `${gameState.player2.name} Wins!`;
         winnerText.style.color = 'var(--accent-p2)';
         vibrate([50, 50, 100]);
     } else {
-        winnerText.textContent = "It's a Tie! 🤝";
+        winnerText.textContent = "It's a Tie!";
         winnerText.style.color = 'var(--text-main)';
         vibrate([30, 30, 30, 30]);
     }
