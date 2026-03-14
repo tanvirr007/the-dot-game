@@ -393,6 +393,12 @@ body {
     flex-shrink: 0;
 }
 
+.vs-badge-sm {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+}
+
 .final-score-card {
     flex: 1;
     max-width: 180px;
