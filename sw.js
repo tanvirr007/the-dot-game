@@ -1,5 +1,5 @@
 // Cache version — bump this string to bust the cache on next deploy
-const CACHE_VERSION = 'v1.0.4';
+const CACHE_VERSION = 'v1.0.5';
 const CACHE_NAME = `dot-game-${CACHE_VERSION}`;
 
 // Files to pre-cache on install
@@ -42,27 +42,26 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// ─── Fetch (Cache-first, network fallback) ───────────────────────────────────
+// ─── Fetch (Network-first, Cache fallback) ───────────────────────────────────
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-
-      // Not in cache — fetch from network and cache result
-      return fetch(event.request).then((response) => {
-        // Only cache valid responses
-        if (!response || response.status !== 200 || response.type === 'opaque') {
-          return response;
-        }
-        const cloned = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, cloned);
-        });
+    fetch(event.request).then((response) => {
+      // Validate response
+      if (!response || response.status !== 200 || response.type === 'opaque') {
         return response;
+      }
+      // Cache the new response
+      const cloned = response.clone();
+      caches.open(CACHE_NAME).then((cache) => {
+        cache.put(event.request, cloned);
       });
+      return response;
+    }).catch(() => {
+      // Network failed (offline) — fallback to cache
+      return caches.match(event.request);
     })
   );
 });
