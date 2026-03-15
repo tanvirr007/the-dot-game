@@ -12,7 +12,8 @@ let gameState = {
     availableLines: [],
     drawnLines: new Set(),
     gameOver: false,
-    isProcessing: false
+    isProcessing: false,
+    inactivityTimer: null
 };
 
 // DOM Elements
@@ -26,6 +27,8 @@ const screens = {
 const startBtn = document.getElementById('start-btn');
 const pvcOptions = document.getElementById('pvc-options');
 const gameBoard = document.getElementById('game-board');
+const hintContainer = document.getElementById('hint-container');
+const hintBtn = document.getElementById('hint-btn');
 
 // Initialize
 function init() {
@@ -40,6 +43,7 @@ function setupEventListeners() {
     document.getElementById('cancel-quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.add('hidden'); document.getElementById('quit-btn').classList.remove('hidden'); });
     document.getElementById('rematch-btn').addEventListener('click', () => { vibrate(20); rematch(); });
     document.getElementById('new-game-btn').addEventListener('click', () => { vibrate(20); quitGame(); });
+    hintBtn.addEventListener('click', provideHint);
 }
 
 function initSliders() {
@@ -96,6 +100,7 @@ function setMode(mode) {
 
     if (mode === 'pvc') {
         pvcOptions.classList.remove('hidden');
+        hintContainer.classList.remove('hidden');
         gameState.player2.name = 'Computer';
         // Recalculate slider for all active buttons in pvcOptions since they were hidden on load
         setTimeout(() => {
@@ -103,6 +108,7 @@ function setMode(mode) {
         }, 10);
     } else {
         pvcOptions.classList.add('hidden');
+        hintContainer.classList.add('hidden');
         gameState.player2.name = 'Player 2';
     }
     updateScoreboardNames();
@@ -294,11 +300,19 @@ function setProcessing(val) {
     if (container) {
         container.classList.toggle('disabled-board', val || (gameState.mode === 'pvc' && gameState.currentTurn === 2));
     }
+    // Update hint button state
+    if (hintBtn) {
+        hintBtn.disabled = val || (gameState.mode === 'pvc' && gameState.currentTurn === 2) || gameState.gameOver;
+    }
 }
 
 function handleLineClick(line, isManual = false) {
     if (gameState.gameOver || gameState.drawnLines.has(line.id)) return;
     
+    // Clear any hints when a move is made
+    clearHint();
+    resetInactivityTimer();
+
     // Guard: Prevent manual moves during AI turn or while board is explicitly locked
     if (isManual && (gameState.isProcessing || (gameState.mode === 'pvc' && gameState.currentTurn === 2))) return;
 
@@ -402,6 +416,7 @@ function switchTurn() {
     } else if (gameState.mode === 'pvc' && gameState.currentTurn === 1) {
         // Ensure UI is unlocked for human turn
         setProcessing(false);
+        resetInactivityTimer();
     }
 }
 
@@ -496,6 +511,79 @@ function rematch() {
     // Keep mode/difficulty but reset scores and board
     startGame();
 }
+
+// ─── Hint System ─────────────────────────────────────────────────────────────
+
+function provideHint() {
+    if (gameState.gameOver || gameState.isProcessing) return;
+    if (gameState.mode !== 'pvc' || gameState.currentTurn !== 1) return;
+
+    vibrate(20);
+    
+    // Clear any existing hint first
+    clearHint();
+
+    // Snapshot with swapped scores to use AI logic for human player suggestions
+    const snap = {
+        gridSize   : gameState.gridSize,
+        allLineIds : gameState.allLineIds,
+        drawn      : new Set(gameState.drawnLines),
+        available  : [...gameState.availableLines],
+        // Swap scores so AI evaluates best move for "itself" (which is actually us)
+        aiScore    : gameState.player1.score, 
+        humanScore : gameState.player2.score,
+    };
+
+    // 1. Explicitly check for box-completing moves first (guaranteed suggestion)
+    let targetLineId = typeof _findCompletingLine === 'function' 
+        ? _findCompletingLine(snap, snap.drawn) 
+        : null;
+
+    // 2. Fallback to AI's general recommendation if no immediate box capture
+    if (!targetLineId) {
+        targetLineId = getAIMove(snap, gameState.difficulty);
+    }
+    
+    const line = document.getElementById(targetLineId);
+    
+    if (line) {
+        line.classList.add('hint-highlight');
+        // Clear after 2 seconds automatically
+        gameState.hintTimeout = setTimeout(clearHint, 2000);
+    }
+}
+
+function clearHint() {
+    if (gameState.hintTimeout) {
+        clearTimeout(gameState.hintTimeout);
+        gameState.hintTimeout = null;
+    }
+    hintBtn.classList.remove('hint-shake');
+    document.querySelectorAll('.hint-highlight').forEach(el => {
+        el.classList.remove('hint-highlight');
+    });
+}
+
+// ─── Interaction Monitoring ─────────────────────────────────────────────────
+
+function resetInactivityTimer() {
+    if (gameState.inactivityTimer) {
+        clearTimeout(gameState.inactivityTimer);
+    }
+    hintBtn.classList.remove('hint-shake');
+    
+    if (gameState.mode === 'pvc' && gameState.currentTurn === 1 && !gameState.gameOver) {
+        gameState.inactivityTimer = setTimeout(() => {
+            if (gameState.currentTurn === 1 && !gameState.gameOver && !gameState.isProcessing) {
+                hintBtn.classList.add('hint-shake');
+            }
+        }, 8000); // 8 seconds of inactivity
+    }
+}
+
+// Global reset on interaction
+document.addEventListener('mousedown', resetInactivityTimer);
+document.addEventListener('touchstart', resetInactivityTimer);
 
 // Start the app
 init();

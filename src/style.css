@@ -313,6 +313,70 @@ body {
 
 .line.drawn-p1 { background-color: var(--accent-p1); box-shadow: 0 0 10px var(--accent-p1-glow); }
 .line.drawn-p2 { background-color: var(--accent-p2); box-shadow: 0 0 10px var(--accent-p2-glow); }
+.line.hint-highlight {
+    background-color: var(--accent-p1);
+    box-shadow: 0 0 15px var(--accent-p1-glow);
+    animation: hintPulse 1.0s ease-in-out infinite;
+    z-index: 6;
+}
+
+@keyframes hintPulse {
+    0% { opacity: 0.4; filter: brightness(1.5); }
+    50% { opacity: 1; filter: brightness(2); }
+    100% { opacity: 0.4; filter: brightness(1.5); }
+}
+
+@keyframes hintShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.hint-shake {
+    animation: hintShake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+    border-color: var(--accent-p1) !important;
+    color: var(--accent-p1) !important;
+}
+
+.hint-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.hint-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.hint-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent-p1);
+    border-color: var(--accent-p1);
+    transform: translateY(-2px);
+}
+
+.hint-btn:active {
+    transform: scale(0.9);
+}
+
+.hint-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    transform: none;
+}
 
 .line.horizontal {
     height: 6px;
