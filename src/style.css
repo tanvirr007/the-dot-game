@@ -449,7 +449,7 @@ body {
 }
 
 #quit-btn {
-    position: absolute;
+    position: fixed;
     top: 20px;
     left: 20px;
     z-index: 10001;
@@ -468,6 +468,12 @@ body {
     justify-content: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 0;
+    animation: fadeInOpacity 0.5s ease-out;
+}
+
+@keyframes fadeInOpacity {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 #quit-btn:hover {

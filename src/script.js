@@ -129,6 +129,15 @@ function setStartingPlayer(player) {
 function showScreen(screenId) {
     Object.values(screens).forEach(s => s.classList.add('hidden'));
     screens[screenId].classList.remove('hidden');
+
+    const quitBtn = document.getElementById('quit-btn');
+    if (quitBtn) {
+        if (screenId === 'game') {
+            quitBtn.classList.remove('hidden');
+        } else {
+            quitBtn.classList.add('hidden');
+        }
+    }
 }
 
 function quitGame() {
