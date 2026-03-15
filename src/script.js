@@ -35,9 +35,9 @@ function init() {
 
 function setupEventListeners() {
     startBtn.addEventListener('click', startGame);
-    document.getElementById('quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.remove('hidden'); });
-    document.getElementById('confirm-quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.add('hidden'); quitGame(); });
-    document.getElementById('cancel-quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.add('hidden'); });
+    document.getElementById('quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.remove('hidden'); document.getElementById('quit-btn').classList.add('hidden'); });
+    document.getElementById('confirm-quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.add('hidden'); document.getElementById('quit-btn').classList.remove('hidden'); quitGame(); });
+    document.getElementById('cancel-quit-btn').addEventListener('click', () => { vibrate(20); screens.quitModal.classList.add('hidden'); document.getElementById('quit-btn').classList.remove('hidden'); });
     document.getElementById('rematch-btn').addEventListener('click', () => { vibrate(20); rematch(); });
     document.getElementById('new-game-btn').addEventListener('click', () => { vibrate(20); quitGame(); });
 }
