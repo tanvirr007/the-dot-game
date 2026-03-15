@@ -560,7 +560,7 @@ function clearHint() {
         clearTimeout(gameState.hintTimeout);
         gameState.hintTimeout = null;
     }
-    hintBtn.classList.remove('hint-shake');
+    hintBtn.classList.remove('hint-pulse');
     document.querySelectorAll('.hint-highlight').forEach(el => {
         el.classList.remove('hint-highlight');
     });
@@ -573,25 +573,24 @@ function resetInactivityTimer() {
         clearTimeout(gameState.inactivityTimer);
         gameState.inactivityTimer = null;
     }
-    hintBtn.classList.remove('hint-shake');
+    hintBtn.classList.remove('hint-pulse');
     
     if (gameState.mode === 'pvc' && gameState.currentTurn === 1 && !gameState.gameOver) {
-        const startShakeTimer = (delay) => {
+        const startPulseTimer = (delay) => {
             gameState.inactivityTimer = setTimeout(() => {
                 if (gameState.currentTurn === 1 && !gameState.gameOver && !gameState.isProcessing) {
-                    // Apply shake
-                    hintBtn.classList.remove('hint-shake');
-                    void hintBtn.offsetWidth; // Trigger reflow to restart animation
-                    hintBtn.classList.add('hint-shake');
+                    // Apply pulse
+                    hintBtn.classList.add('hint-pulse');
                     
-                    // Schedule next shake in 2 seconds
-                    startShakeTimer(2000);
+                    // The pulse is CSS infinite, but we can restart it if needed.
+                    // However, the requirement says "softly fade in and out in a smooth loop".
+                    // The CSS animation already does this.
                 }
             }, delay);
         };
 
-        // First shake after 3 seconds
-        startShakeTimer(3000);
+        // First pulse after 3 seconds
+        startPulseTimer(3000);
     }
 }
 
