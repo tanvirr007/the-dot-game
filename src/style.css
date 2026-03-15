@@ -444,13 +444,27 @@ body {
     min-width: 0;
 }
 
-.game-controls {
+#quit-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10001;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #2c3e50;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    border: 2px solid white;
     display: flex;
+    align-items: center;
     justify-content: center;
+    transition: transform 0.2s;
 }
 
-.game-controls .secondary-btn {
-    max-width: 200px;
+#quit-btn:hover {
+    transform: scale(1.1);
 }
 
 /* ==============================
