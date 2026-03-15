@@ -449,22 +449,33 @@ body {
     top: 20px;
     left: 20px;
     z-index: 10001;
-    width: 35px;
-    height: 35px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: #2c3e50;
-    color: white;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background: rgba(56, 189, 248, 0.08); /* glassmorphic background */
+    color: var(--accent-p1); /* matching 'Yes' button color */
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     cursor: pointer;
-    border: 2px solid white;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
 }
 
 #quit-btn:hover {
-    transform: scale(1.1);
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent-p1);
+    color: white;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+    transform: translateY(-2px);
+}
+
+#quit-btn:active {
+    transform: translateY(0);
 }
 
 /* ==============================
