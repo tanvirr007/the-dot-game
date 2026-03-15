@@ -185,6 +185,8 @@ function startGame() {
         // Trigger AI if pvc mode starts with AI turn
         if (gameState.mode === 'pvc' && gameState.currentTurn === 2) {
             setTimeout(computerMove, 600);
+        } else {
+            resetInactivityTimer();
         }
     });
 }
@@ -569,15 +571,27 @@ function clearHint() {
 function resetInactivityTimer() {
     if (gameState.inactivityTimer) {
         clearTimeout(gameState.inactivityTimer);
+        gameState.inactivityTimer = null;
     }
     hintBtn.classList.remove('hint-shake');
     
     if (gameState.mode === 'pvc' && gameState.currentTurn === 1 && !gameState.gameOver) {
-        gameState.inactivityTimer = setTimeout(() => {
-            if (gameState.currentTurn === 1 && !gameState.gameOver && !gameState.isProcessing) {
-                hintBtn.classList.add('hint-shake');
-            }
-        }, 8000); // 8 seconds of inactivity
+        const startShakeTimer = (delay) => {
+            gameState.inactivityTimer = setTimeout(() => {
+                if (gameState.currentTurn === 1 && !gameState.gameOver && !gameState.isProcessing) {
+                    // Apply shake
+                    hintBtn.classList.remove('hint-shake');
+                    void hintBtn.offsetWidth; // Trigger reflow to restart animation
+                    hintBtn.classList.add('hint-shake');
+                    
+                    // Schedule next shake in 2 seconds
+                    startShakeTimer(2000);
+                }
+            }, delay);
+        };
+
+        // First shake after 3 seconds
+        startShakeTimer(3000);
     }
 }
 
