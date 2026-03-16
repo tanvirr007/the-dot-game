@@ -635,21 +635,17 @@ function resetInactivityTimer() {
     hintBtn.classList.remove('hint-pulse');
     
     if (gameState.mode === 'pvc' && gameState.currentTurn === 1 && !gameState.gameOver) {
-        const startPulseTimer = (delay) => {
+        const startHintTimer = (delay) => {
             gameState.inactivityTimer = setTimeout(() => {
                 if (gameState.currentTurn === 1 && !gameState.gameOver && !gameState.isProcessing) {
-                    // Apply pulse
+                    // Apply sonar ripple effect
                     hintBtn.classList.add('hint-pulse');
-                    
-                    // The pulse is CSS infinite, but we can restart it if needed.
-                    // However, the requirement says "softly fade in and out in a smooth loop".
-                    // The CSS animation already does this.
                 }
             }, delay);
         };
 
-        // First pulse after 3 seconds
-        startPulseTimer(3000);
+        // Trigger sonar after 8 seconds of inactivity
+        startHintTimer(8000);
     }
 }
 
