@@ -940,13 +940,18 @@ body {
 .expandable-section {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 0 !important; /* Remove gap when hidden */
+    transition: 
+        grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        margin-bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     width: 100%;
 }
 
 .expandable-section.show {
     grid-template-rows: 1fr;
+    margin-bottom: 24px !important; /* Match .setup-group margin when shown */
 }
+
 
 .expandable-container {
     overflow: hidden;
