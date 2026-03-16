@@ -627,6 +627,14 @@ body {
     animation: fadeInOpacity 0.5s ease-out;
 }
 
+#quit-btn img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    filter: invert(1) opacity(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @keyframes fadeInOpacity {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -635,9 +643,13 @@ body {
 #quit-btn:hover {
     background: rgba(56, 189, 248, 0.15);
     border-color: var(--accent-p1);
-    color: white;
     box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
     transform: translateY(-2px);
+}
+
+#quit-btn:hover img {
+    filter: invert(1) opacity(1);
+    transform: scale(1.1);
 }
 
 #quit-btn:active {
