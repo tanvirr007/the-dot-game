@@ -4,18 +4,23 @@ A modern, premium, and responsive implementation of the classic **Dots and Boxes
 
 ## ✨ Features
 
-- **Premium Design**: Sleek "Glassmorphism" UI with smooth gradients, vibrant colors, and dynamic animations.
+- **Premium Design**: Sleek "Glassmorphism" UI with minimalist modern buttons, smooth gradients, and fluid transitions.
 - **Game Modes**: 
-  - **1 vs 1**: Local multiplayer with a shared device.
+  - **1 vs 1**: Local multiplayer with a shared device and smooth mode transitions.
   - **vs Computer**: Challenge an advanced AI with **Easy**, **Medium**, and **Hard** levels.
 - **Expert AI Engine**: High-performance engine featuring Minimax with Alpha-Beta Pruning, chain detection, and double-cross strategies for unbeatable difficulty.
+- **Time Trial Mode**: A high-stakes mode with a minimalist "solid-color" timebar and a 3-second red alert for fast-paced play.
 - **Gameplay Tools**:
   - **Replay (Last Move)**: Hold the replay icon to highlight the most recent move.
   - **Smart Hints**: AI-powered move suggestions with a visual sonar "pulse" reminder.
   - **Quick Restart**: Easy match reset via a dedicated restart button.
+- **Modern UI Components**: 
+  - **Glassmorphic Toggles**: Refined selection sliders with backdrops and soft glows.
+  - **Animated Transitions**: Smooth slide-and-fade effects when switching between menu options.
 - **Tooltips & UX**: Helpful tooltips on all action buttons and intuitive interactive elements.
 - **Haptic Feedback**: Subtle vibration patterns for moves, box completions, and UI interactions.
 - **PWA Ready**: Installable as a progressive web app with full offline support.
+
 
 ## 🕹️ How to Play
 
