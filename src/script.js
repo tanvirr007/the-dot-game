@@ -137,14 +137,18 @@ function setMode(mode, silent = false) {
     updateSlider(btn);
 
     if (mode === 'pvc') {
-        pvcOptions.classList.remove('hidden');
+        pvcOptions.classList.add('show');
         gameState.player2.name = 'Computer';
-        // Recalculate slider for all active buttons in pvcOptions since they were hidden on load
+        // Recalculate slider for all active buttons in pvcOptions as they animate in
         setTimeout(() => {
             pvcOptions.querySelectorAll('.active').forEach(activeBtn => updateSlider(activeBtn));
-        }, 10);
+        }, 50);
+        // Final sync after animation finishes
+        setTimeout(() => {
+            pvcOptions.querySelectorAll('.active').forEach(activeBtn => updateSlider(activeBtn));
+        }, 450);
     } else {
-        pvcOptions.classList.add('hidden');
+        pvcOptions.classList.remove('show');
         gameState.player2.name = 'Player 2';
     }
     // Always show hint/replay/restart buttons in both modes

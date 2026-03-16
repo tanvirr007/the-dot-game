@@ -42,23 +42,28 @@
                     </div>
                 </div>
 
-                <div id="pvc-options" class="setup-group hidden">
-                    <div class="setup-subgroup">
-                        <label>Difficulty</label>
-                        <div class="toggle-group">
-                            <button id="diff-easy" class="toggle-btn active" onclick="setDiff('easy')">Easy</button>
-                            <button id="diff-medium" class="toggle-btn" onclick="setDiff('medium')">Medium</button>
-                            <button id="diff-hard" class="toggle-btn" onclick="setDiff('hard')">Hard</button>
-                        </div>
-                    </div>
-                    <div class="setup-subgroup">
-                        <label>First Move</label>
-                        <div class="toggle-group">
-                            <button id="start-p1" class="toggle-btn active" onclick="setStartingPlayer(1)">You</button>
-                            <button id="start-p2" class="toggle-btn" onclick="setStartingPlayer(2)">Computer</button>
+                <div id="pvc-options" class="setup-group expandable-section">
+                    <div class="expandable-container">
+                        <div class="expandable-content">
+                            <div class="setup-subgroup">
+                                <label>Difficulty</label>
+                                <div class="toggle-group">
+                                    <button id="diff-easy" class="toggle-btn active" onclick="setDiff('easy')">Easy</button>
+                                    <button id="diff-medium" class="toggle-btn" onclick="setDiff('medium')">Medium</button>
+                                    <button id="diff-hard" class="toggle-btn" onclick="setDiff('hard')">Hard</button>
+                                </div>
+                            </div>
+                            <div class="setup-subgroup">
+                                <label>First Move</label>
+                                <div class="toggle-group">
+                                    <button id="start-p1" class="toggle-btn active" onclick="setStartingPlayer(1)">You</button>
+                                    <button id="start-p2" class="toggle-btn" onclick="setStartingPlayer(2)">Computer</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
 
                 <div class="setup-group">
                     <label>Time Trial</label>

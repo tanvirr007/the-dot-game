@@ -936,4 +936,34 @@ body {
     box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
+/* Expandable Section Animation */
+.expandable-section {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+}
+
+.expandable-section.show {
+    grid-template-rows: 1fr;
+}
+
+.expandable-container {
+    overflow: hidden;
+    width: 100%;
+}
+
+.expandable-content {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.expandable-section.show .expandable-content {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.1s;
+}
+
+
 
