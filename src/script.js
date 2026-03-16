@@ -422,6 +422,9 @@ function handleLineClick(line, isManual = false) {
                 // Keep board locked during AI thinking gap
                 setProcessing(true);
                 setTimeout(computerMove, 600);
+            } else {
+                // Human player bonus turn: Restart timer
+                if (gameState.timeTrial) startTurnTimer();
             }
         } else {
             switchTurn();
