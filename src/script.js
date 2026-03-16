@@ -43,6 +43,12 @@ function init() {
     initSliders();
     // Initialize mode UI based on default state
     setMode(gameState.mode, true);
+    
+    // Set current year in copyright
+    const yearEl = document.getElementById('current-year');
+    if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+    }
 }
 
 function setupEventListeners() {
