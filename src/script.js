@@ -31,6 +31,7 @@ const gameBoard = document.getElementById('game-board');
 const hintContainer = document.getElementById('hint-container');
 const hintBtn = document.getElementById('hint-btn');
 const lastMoveBtn = document.getElementById('last-move-btn');
+const restartBtn = document.getElementById('restart-btn');
 
 // Initialize
 function init() {
@@ -55,6 +56,10 @@ function setupEventListeners() {
         // Touch support
         lastMoveBtn.addEventListener('touchstart', (e) => { e.preventDefault(); highlightLastMove(); }, { passive: false });
         lastMoveBtn.addEventListener('touchend', (e) => { e.preventDefault(); clearLastMoveHighlight(); }, { passive: false });
+    }
+
+    if (restartBtn) {
+        restartBtn.addEventListener('click', () => { vibrate(20); rematch(); });
     }
 }
 
@@ -322,6 +327,9 @@ function setProcessing(val) {
     }
     if (lastMoveBtn) {
         lastMoveBtn.disabled = val || (gameState.mode === 'pvc' && gameState.currentTurn === 2) || gameState.gameOver;
+    }
+    if (restartBtn) {
+        restartBtn.disabled = val || (gameState.mode === 'pvc' && gameState.currentTurn === 2) || gameState.gameOver;
     }
 }
 
