@@ -314,6 +314,8 @@ body {
 .line.drawn-p1 { background-color: var(--accent-p1); box-shadow: 0 0 10px var(--accent-p1-glow); }
 .line.drawn-p2 { background-color: var(--accent-p2); box-shadow: 0 0 10px var(--accent-p2-glow); }
 .line.hint-highlight {
+    background-color: var(--accent-p1);
+    box-shadow: 0 0 15px var(--accent-p1-glow);
     animation: hintPulse 1.0s ease-in-out infinite;
     z-index: 6;
 }
