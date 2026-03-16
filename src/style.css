@@ -349,9 +349,9 @@ body {
     animation: pulseGlow 2s ease-in-out infinite;
 }
 
-.hint-pulse svg {
+.hint-pulse img {
     animation: lightbulbShimmer 2s ease-in-out infinite;
-    color: var(--accent-p1);
+    filter: invert(1) brightness(1.5);
 }
 
 .hint-container {
@@ -377,15 +377,23 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.hint-btn svg {
+.hint-btn img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    filter: invert(1) opacity(0.6);
     transition: all var(--transition-speed);
 }
 
 .hint-btn:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: var(--accent-p1);
     border-color: var(--accent-p1);
     transform: translateY(-2px);
+}
+
+.hint-btn:hover img {
+    filter: invert(1) opacity(1);
+    transform: scale(1.1);
 }
 
 .hint-btn:active {
