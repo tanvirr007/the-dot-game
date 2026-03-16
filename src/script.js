@@ -538,6 +538,7 @@ function updateTimerUI() {
     const percentage = (gameState.timeLeft / 10) * 100;
     timerBar.style.width = `${percentage}%`;
 
+    // Alert color at 3 seconds
     if (gameState.timeLeft <= 3) {
         timerBar.classList.add('warning');
     } else {

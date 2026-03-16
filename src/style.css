@@ -25,7 +25,8 @@
     user-select: none;
 }
 
-html, body {
+html,
+body {
     height: 100%;
     width: 100%;
     overflow: hidden;
@@ -37,7 +38,7 @@ body {
     font-family: var(--font-family);
     display: flex;
     flex-direction: column;
-    background-image: 
+    background-image:
         radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.1) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(251, 113, 133, 0.1) 0px, transparent 50%);
 }
@@ -67,8 +68,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Glass Card Styling */
@@ -253,11 +261,27 @@ body {
     box-shadow: 0 0 20px var(--glow);
 }
 
-.score-card.p1 { color: var(--accent-p1); --glow: var(--accent-p1-glow); }
-.score-card.p2 { color: var(--accent-p2); --glow: var(--accent-p2-glow); }
+.score-card.p1 {
+    color: var(--accent-p1);
+    --glow: var(--accent-p1-glow);
+}
 
-.player-name { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
-.player-points { font-size: 1.8rem; font-weight: 700; }
+.score-card.p2 {
+    color: var(--accent-p2);
+    --glow: var(--accent-p2-glow);
+}
+
+.player-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.player-points {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
 
 /* Game Board */
 #board-container {
@@ -311,8 +335,16 @@ body {
     cursor: default;
 }
 
-.line.drawn-p1 { background-color: var(--accent-p1); box-shadow: 0 0 10px var(--accent-p1-glow); }
-.line.drawn-p2 { background-color: var(--accent-p2); box-shadow: 0 0 10px var(--accent-p2-glow); }
+.line.drawn-p1 {
+    background-color: var(--accent-p1);
+    box-shadow: 0 0 10px var(--accent-p1-glow);
+}
+
+.line.drawn-p2 {
+    background-color: var(--accent-p2);
+    box-shadow: 0 0 10px var(--accent-p2-glow);
+}
+
 .line.hint-highlight {
     background-color: var(--accent-p1);
     box-shadow: 0 0 15px var(--accent-p1-glow);
@@ -328,9 +360,20 @@ body {
 }
 
 @keyframes iconPulse {
-    0% { transform: scale(1); filter: invert(1) brightness(1); }
-    50% { transform: scale(1.1); filter: invert(1) brightness(1.8) drop-shadow(0 0 5px var(--accent-p1)); }
-    100% { transform: scale(1); filter: invert(1) brightness(1); }
+    0% {
+        transform: scale(1);
+        filter: invert(1) brightness(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+        filter: invert(1) brightness(1.8) drop-shadow(0 0 5px var(--accent-p1));
+    }
+
+    100% {
+        transform: scale(1);
+        filter: invert(1) brightness(1);
+    }
 }
 
 .hint-pulse {
@@ -466,8 +509,13 @@ body {
     transition: background-color 0.5s ease;
 }
 
-.box.filled-p1 { background-color: var(--accent-p1-glow); }
-.box.filled-p2 { background-color: var(--accent-p2-glow); }
+.box.filled-p1 {
+    background-color: var(--accent-p1-glow);
+}
+
+.box.filled-p2 {
+    background-color: var(--accent-p2-glow);
+}
 
 .box-word {
     font-size: 1rem;
@@ -489,7 +537,8 @@ body {
     text-shadow: 0 0 10px rgba(251, 113, 133, 0.3);
 }
 
-.box.filled-p1 .box-word, .box.filled-p2 .box-word {
+.box.filled-p1 .box-word,
+.box.filled-p2 .box-word {
     opacity: 1;
     transform: scale(1);
 }
@@ -544,8 +593,13 @@ body {
     border: 1px solid var(--border-color);
 }
 
-.final-score-card.p1 { color: var(--accent-p1); }
-.final-score-card.p2 { color: var(--accent-p2); }
+.final-score-card.p1 {
+    color: var(--accent-p1);
+}
+
+.final-score-card.p2 {
+    color: var(--accent-p2);
+}
 
 .final-player-name {
     font-size: 0.85rem;
@@ -583,8 +637,10 @@ body {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(56, 189, 248, 0.08); /* glassmorphic background */
-    color: var(--accent-p1); /* matching 'Yes' button color */
+    background: rgba(56, 189, 248, 0.08);
+    /* glassmorphic background */
+    color: var(--accent-p1);
+    /* matching 'Yes' button color */
     border: 1px solid rgba(56, 189, 248, 0.3);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(8px);
@@ -607,8 +663,13 @@ body {
 }
 
 @keyframes fadeInOpacity {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 #quit-btn:hover {
@@ -783,6 +844,7 @@ body {
         margin: 15px 0;
     }
 }
+
 /* Footer Credits */
 .credits {
     margin-top: 16px;
@@ -801,6 +863,7 @@ body {
 .credits a:hover {
     color: #fff;
 }
+
 /* Confirmation Modal */
 .modal-overlay {
     position: fixed;
@@ -846,31 +909,31 @@ body {
     cursor: wait;
 }
 
-/* Timer Bar Styles */
+/* Minimalist Timer Bar Styles */
 #timer-container {
     width: 100%;
-    height: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-    margin-top: 20px;
+    height: 6px;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 10px;
+    margin-top: 25px;
     overflow: hidden;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
 }
 
 #timer-bar {
     width: 100%;
     height: 100%;
-    background: linear-gradient(to right, #10b981, #3b82f6);
-    transition: width 0.1s linear, background-color 0.3s ease;
+    background: var(--accent-p1); /* Solid modern cyan */
+    border-radius: 10px;
+    transition: width 0.1s linear, background 0.3s ease;
 }
 
 #timer-bar.warning {
-    background: #ef4444;
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-    animation: timerPulse 0.5s ease-in-out infinite alternate;
+    background: #ef4444; /* Solid red for alert */
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
-@keyframes timerPulse {
-    from { opacity: 1; transform: scaleY(1); }
-    to { opacity: 0.7; transform: scaleY(1.2); }
-}
+
