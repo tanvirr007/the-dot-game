@@ -63,6 +63,7 @@ function setupEventListeners() {
         restartBtn.addEventListener('click', () => { 
             vibrate(20); 
             screens.restartModal.classList.remove('hidden'); 
+            document.getElementById('quit-btn').classList.add('hidden');
         });
     }
 
@@ -74,6 +75,7 @@ function setupEventListeners() {
     document.getElementById('cancel-restart-btn').addEventListener('click', () => { 
         vibrate(20); 
         screens.restartModal.classList.add('hidden'); 
+        document.getElementById('quit-btn').classList.remove('hidden');
     });
 }
 
