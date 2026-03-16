@@ -135,19 +135,24 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 4px;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03); /* Subtle background */
+    padding: 5px;
+    border-radius: 16px; /* Rounder corners */
     gap: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .slider {
     position: absolute;
-    background: var(--text-main);
-    border-radius: 10px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.12); /* Glassmorphic selection */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
     z-index: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-btn {
@@ -159,52 +164,53 @@ body {
     background: transparent;
     color: var(--text-muted);
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     font-family: inherit;
-    font-weight: 600;
-    transition: color var(--transition-speed);
-    font-size: 1rem;
+    font-weight: 500; /* Cleaner medium weight */
+    transition: all var(--transition-speed);
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
 }
 
 .toggle-btn.active {
     background: transparent;
-    color: var(--primary-bg);
+    color: var(--text-main); /* White text on glass slider */
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.toggle-btn:active {
+    transform: scale(0.96);
 }
 
 .primary-btn {
     width: 100%;
     padding: 16px;
-    background: rgba(56, 189, 248, 0.08);
+    background: rgba(56, 189, 248, 0.1);
     color: var(--accent-p1);
     border: 1px solid rgba(56, 189, 248, 0.3);
-    border-radius: 16px;
-    font-size: 1rem;
-    font-weight: 700;
+    border-radius: 18px; /* Rounder for modern feel */
+    font-size: 1.05rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin-top: 24px;
-    text-transform: uppercase;
-    letter-spacing: 3px;
+    letter-spacing: 0.5px; /* Less aggressive than before */
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .primary-btn:hover:not(:disabled) {
-    background: rgba(56, 189, 248, 0.15);
+    background: rgba(56, 189, 248, 0.2);
     border-color: var(--accent-p1);
-    color: white;
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+    color: #fff;
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
     transform: translateY(-2px);
 }
 
 .primary-btn:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.primary-btn:active:not(:disabled) {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 .primary-btn:disabled {
@@ -214,19 +220,20 @@ body {
 
 .secondary-btn {
     width: 100%;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.03);
     color: var(--text-main);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: background var(--transition-speed);
+    transition: all var(--transition-speed);
 }
 
 .secondary-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Game Screen Header */
