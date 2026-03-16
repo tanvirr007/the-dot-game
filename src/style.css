@@ -433,6 +433,17 @@ body {
     transform: translateX(-50%) translateY(0);
 }
 
+/* Bottom Tooltip Variant */
+[data-tooltip-pos="bottom"]::after {
+    bottom: auto;
+    top: 120%;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+[data-tooltip-pos="bottom"]:hover::after {
+    transform: translateX(-50%) translateY(0);
+}
+
 .line.horizontal {
     height: 6px;
     top: 50%;
