@@ -11,6 +11,7 @@ let gameState = {
     filledBoxes: 0,
     availableLines: [],
     drawnLines: new Set(),
+    lastMove: null, // ID of the most recent move
     gameOver: false,
     isProcessing: false,
     inactivityTimer: null
@@ -29,6 +30,7 @@ const pvcOptions = document.getElementById('pvc-options');
 const gameBoard = document.getElementById('game-board');
 const hintContainer = document.getElementById('hint-container');
 const hintBtn = document.getElementById('hint-btn');
+const lastMoveBtn = document.getElementById('last-move-btn');
 
 // Initialize
 function init() {
@@ -44,6 +46,16 @@ function setupEventListeners() {
     document.getElementById('rematch-btn').addEventListener('click', () => { vibrate(20); rematch(); });
     document.getElementById('new-game-btn').addEventListener('click', () => { vibrate(20); quitGame(); });
     hintBtn.addEventListener('click', provideHint);
+    
+    // View Last Move Event Listeners
+    if (lastMoveBtn) {
+        lastMoveBtn.addEventListener('mousedown', highlightLastMove);
+        lastMoveBtn.addEventListener('mouseup', clearLastMoveHighlight);
+        lastMoveBtn.addEventListener('mouseleave', clearLastMoveHighlight);
+        // Touch support
+        lastMoveBtn.addEventListener('touchstart', (e) => { e.preventDefault(); highlightLastMove(); }, { passive: false });
+        lastMoveBtn.addEventListener('touchend', (e) => { e.preventDefault(); clearLastMoveHighlight(); }, { passive: false });
+    }
 }
 
 function initSliders() {
@@ -152,6 +164,7 @@ function quitGame() {
     gameState.player2.score = 0;
     gameState.filledBoxes = 0;
     gameState.currentTurn = 1;
+    gameState.lastMove = null;
     gameState.isProcessing = false; // Reset lock
     showScreen('setup');
     updateScoreboard();
@@ -169,6 +182,7 @@ function startGame() {
     gameState.availableLines = [];
     gameState.allLineIds = [];
     gameState.totalLines = 0;
+    gameState.lastMove = null;
 
     vibrate(30);
 
@@ -306,6 +320,9 @@ function setProcessing(val) {
     if (hintBtn) {
         hintBtn.disabled = val || (gameState.mode === 'pvc' && gameState.currentTurn === 2) || gameState.gameOver;
     }
+    if (lastMoveBtn) {
+        lastMoveBtn.disabled = val || (gameState.mode === 'pvc' && gameState.currentTurn === 2) || gameState.gameOver;
+    }
 }
 
 function handleLineClick(line, isManual = false) {
@@ -325,6 +342,7 @@ function handleLineClick(line, isManual = false) {
 
     try {
         vibrate(15);
+        gameState.lastMove = line.id;
         drawLine(line);
         const boxesCompleted = checkBoxes(line);
 
@@ -563,6 +581,23 @@ function clearHint() {
     hintBtn.classList.remove('hint-pulse');
     document.querySelectorAll('.hint-highlight').forEach(el => {
         el.classList.remove('hint-highlight');
+    });
+}
+
+// ─── Last Move System ────────────────────────────────────────────────────────
+
+function highlightLastMove() {
+    if (gameState.gameOver || gameState.isProcessing || !gameState.lastMove) return;
+    vibrate(10);
+    const line = document.getElementById(gameState.lastMove);
+    if (line) {
+        line.classList.add('last-move-highlight');
+    }
+}
+
+function clearLastMoveHighlight() {
+    document.querySelectorAll('.last-move-highlight').forEach(el => {
+        el.classList.remove('last-move-highlight');
     });
 }
 

@@ -314,10 +314,15 @@ body {
 .line.drawn-p1 { background-color: var(--accent-p1); box-shadow: 0 0 10px var(--accent-p1-glow); }
 .line.drawn-p2 { background-color: var(--accent-p2); box-shadow: 0 0 10px var(--accent-p2-glow); }
 .line.hint-highlight {
-    background-color: var(--accent-p1);
-    box-shadow: 0 0 15px var(--accent-p1-glow);
     animation: hintPulse 1.0s ease-in-out infinite;
     z-index: 6;
+}
+
+.line.last-move-highlight {
+    background-color: var(--text-main);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+    filter: brightness(1.5);
+    z-index: 7;
 }
 
 @keyframes hintPulse {
@@ -350,6 +355,7 @@ body {
 .hint-container {
     display: flex;
     justify-content: center;
+    gap: 15px;
     margin-top: 15px;
     width: 100%;
 }
