@@ -38,6 +38,8 @@ const restartBtn = document.getElementById('restart-btn');
 function init() {
     setupEventListeners();
     initSliders();
+    // Initialize mode UI based on default state
+    setMode(gameState.mode, true);
 }
 
 function setupEventListeners() {
@@ -123,8 +125,8 @@ function setSize(size) {
     updateSlider(btn);
 }
 
-function setMode(mode) {
-    vibrate(20);
+function setMode(mode, silent = false) {
+    if (!silent) vibrate(20);
     gameState.mode = mode;
     document.querySelectorAll('#mode-1v1, #mode-pvc').forEach(btn => btn.classList.remove('active'));
     const btn = document.getElementById(`mode-${mode}`);
@@ -133,7 +135,6 @@ function setMode(mode) {
 
     if (mode === 'pvc') {
         pvcOptions.classList.remove('hidden');
-        hintContainer.classList.remove('hidden');
         gameState.player2.name = 'Computer';
         // Recalculate slider for all active buttons in pvcOptions since they were hidden on load
         setTimeout(() => {
@@ -141,8 +142,14 @@ function setMode(mode) {
         }, 10);
     } else {
         pvcOptions.classList.add('hidden');
-        hintContainer.classList.add('hidden');
         gameState.player2.name = 'Player 2';
+    }
+    // Always show hint/replay/restart buttons in both modes
+    hintContainer.classList.remove('hidden');
+    // But specifically hide the hint button in 1v1 mode as requested
+    if (hintBtn) {
+        if (mode === '1v1') hintBtn.classList.add('hidden');
+        else hintBtn.classList.remove('hidden');
     }
     updateScoreboardNames();
 }
@@ -345,7 +352,7 @@ function setProcessing(val) {
         lastMoveBtn.disabled = val || (gameState.mode === 'pvc' && gameState.currentTurn === 2) || gameState.gameOver;
     }
     if (restartBtn) {
-        restartBtn.disabled = val || (gameState.mode === 'pvc' && gameState.currentTurn === 2) || gameState.gameOver;
+        restartBtn.disabled = val || gameState.gameOver;
     }
 }
 
@@ -560,22 +567,26 @@ function rematch() {
 
 function provideHint() {
     if (gameState.gameOver || gameState.isProcessing) return;
-    if (gameState.mode !== 'pvc' || gameState.currentTurn !== 1) return;
+    
+    // In PVC mode, only human can get hints. In 1v1, either player can.
+    if (gameState.mode === 'pvc' && gameState.currentTurn !== 1) return;
 
     vibrate(20);
     
     // Clear any existing hint first
     clearHint();
 
-    // Snapshot with swapped scores to use AI logic for human player suggestions
+    const isP1Turn = gameState.currentTurn === 1;
+
+    // Snapshot with correctly assigned scores based on whose turn it is
     const snap = {
         gridSize   : gameState.gridSize,
         allLineIds : gameState.allLineIds,
         drawn      : new Set(gameState.drawnLines),
         available  : [...gameState.availableLines],
-        // Swap scores so AI evaluates best move for "itself" (which is actually us)
-        aiScore    : gameState.player1.score, 
-        humanScore : gameState.player2.score,
+        // Swap scores so AI evaluates best move for the CURRENT player
+        aiScore    : isP1Turn ? gameState.player1.score : gameState.player2.score, 
+        humanScore : isP1Turn ? gameState.player2.score : gameState.player1.score,
     };
 
     // 1. Explicitly check for box-completing moves first (guaranteed suggestion)
@@ -634,18 +645,23 @@ function resetInactivityTimer() {
     }
     hintBtn.classList.remove('hint-pulse');
     
-    if (gameState.mode === 'pvc' && gameState.currentTurn === 1 && !gameState.gameOver) {
-        const startHintTimer = (delay) => {
-            gameState.inactivityTimer = setTimeout(() => {
-                if (gameState.currentTurn === 1 && !gameState.gameOver && !gameState.isProcessing) {
-                    // Apply sonar ripple effect
-                    hintBtn.classList.add('hint-pulse');
-                }
-            }, delay);
-        };
+    if (!gameState.gameOver) {
+        // Pulse only in PVC mode for Player 1 (human player)
+        const shouldPulse = gameState.mode === 'pvc' && gameState.currentTurn === 1;
+        
+        if (shouldPulse) {
+            const startHintTimer = (delay) => {
+                gameState.inactivityTimer = setTimeout(() => {
+                    if (!gameState.gameOver && !gameState.isProcessing) {
+                        // Apply sonar ripple effect
+                        hintBtn.classList.add('hint-pulse');
+                    }
+                }, delay);
+            };
 
-        // Trigger sonar after 8 seconds of inactivity
-        startHintTimer(8000);
+            // Trigger sonar after 8 seconds of inactivity
+            startHintTimer(8000);
+        }
     }
 }
 
