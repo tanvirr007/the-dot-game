@@ -4,44 +4,47 @@ A modern, premium, and responsive implementation of the classic **Dots and Boxes
 
 ## ✨ Features
 
-- **Premium Design**: Sleek "Glassmorphism" UI with smooth gradients and hover effects.
+- **Premium Design**: Sleek "Glassmorphism" UI with smooth gradients, vibrant colors, and dynamic animations.
 - **Game Modes**: 
-  - **1 vs 1**: Play against a friend on the same device.
-  - **vs Computer**: Challenge an AI with **Easy**, **Medium**, and **Hard** difficulty levels.
-- **First Move Control**: In Computer mode, choose who starts first—you or the AI.
-- **Customizable Grids**: Choose between **3x3** (default), **4x4**, **5x5**, and **6x6** grid sizes.
-- **Responsive & Mobile Friendly**: Fully optimized for mobile, tablet, and desktop with touch support.
-- **Haptic Feedback**: Experience the game with subtle vibrations when drawing lines or completing boxes.
-- **PWA Ready**: Installable as a progressive web app for an app-like experience.
-- **Offline Support**: Works offline thanks to built-in service worker caching.
+  - **1 vs 1**: Local multiplayer with a shared device.
+  - **vs Computer**: Challenge an advanced AI with **Easy**, **Medium**, and **Hard** levels.
+- **Expert AI Engine**: High-performance engine featuring Minimax with Alpha-Beta Pruning, chain detection, and double-cross strategies for unbeatable difficulty.
+- **Gameplay Tools**:
+  - **Replay (Last Move)**: Hold the replay icon to highlight the most recent move.
+  - **Smart Hints**: AI-powered move suggestions with a visual sonar "pulse" reminder.
+  - **Quick Restart**: Easy match reset via a dedicated restart button.
+- **Tooltips & UX**: Helpful tooltips on all action buttons and intuitive interactive elements.
+- **Haptic Feedback**: Subtle vibration patterns for moves, box completions, and UI interactions.
+- **PWA Ready**: Installable as a progressive web app with full offline support.
 
 ## 🕹️ How to Play
 
-1. **Setup**: Choose your grid size and game mode. In "vs Computer" mode, you can also select the difficulty and who makes the first move.
-2. **Objective**: Complete as many squares (boxes) as possible by connecting dots with lines.
-3. **Turns**: Players take turns drawing a single horizontal or vertical line between two unjoined adjacent dots.
-4. **Closing a Box**: If a player completes the fourth side of a 1x1 box, they earn a point and **must take another turn**.
+1. **Setup**: Select grid size (3x3 up to 6x6) and game mode. 
+2. **Objective**: Connect dots to build as many 1x1 boxes as possible.
+3. **Turns & Scoring**: Closing a box grants a point and an **extra turn**.
+4. **Gameplay Buttons**:
+   - 🕒 **Replay**: Highlights the last line drawn.
+   - 💡 **Hint**: Shows the best recommended move (Computer mode only).
+   - 🔄 **Restart**: Quickly start a new round on the same grid.
 5. **AI Difficulty**:
-   - **Easy**: Makes mostly random moves.
-   - **Medium**: Tries to block and finish boxes, but occasionally makes mistakes.
-   - **Hard**: Plays strategically, prioritizing safe moves and box completion.
-6. **Winning**: The game ends when all lines are drawn. The player with the most points wins!
+   - **Easy**: Casual play with mostly random moves.
+   - **Medium**: Competitive play; grabs boxes and avoids simple errors.
+   - **Hard**: Expert level; uses deep search and strategic sacrifices to dominate.
 
 ## 🚀 Quick Start
 
-Simply open `index.html` in any modern web browser or install it as a PWA from the address bar.
+Simply open `index.html` or install the PWA for the best experience.
 
-### Development & Customization
-- **Logic**: `src/script.js` handles the game engine, AI, and haptic feedback.
-- **Styling**: `src/style.css` defines the modern glass UI and animations.
-- **Icons**: Located in `src/img/`.
+### Technical Overview
+- **Core Logic**: `src/script.js` manages state, UI synchronization, and interactivity.
+- **AI Engine**: `src/ai.js` contains the expert Minimax engine and heuristic evaluation.
+- **Modern Styling**: `src/style.css` utilizes CSS variables and glassmorphism tokens.
 
 ## 🛠️ Built With
 
-- **HTML5**: Semantic structure.
-- **Vanilla CSS**: Premium styling without heavy frameworks.
-- **Modern JS**: Smooth game logic, intelligent AI, and Web Vibration API.
-- **PWA**: Manifest and Service Workers for installability.
+- **HTML5 & Vanilla CSS**: Premium design without heavy dependencies.
+- **Expert JavaScript**: Advanced AI algorithms and real-time state management.
+- **PWA Core**: Offline-first architecture with professional manifest configuration.
 
 ## 👤 Credits
 
