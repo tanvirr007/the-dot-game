@@ -22,7 +22,8 @@ const screens = {
     setup: document.getElementById('setup-menu'),
     game: document.getElementById('game-screen'),
     results: document.getElementById('results-screen'),
-    quitModal: document.getElementById('quit-modal')
+    quitModal: document.getElementById('quit-modal'),
+    restartModal: document.getElementById('restart-modal')
 };
 
 const startBtn = document.getElementById('start-btn');
@@ -59,8 +60,21 @@ function setupEventListeners() {
     }
 
     if (restartBtn) {
-        restartBtn.addEventListener('click', () => { vibrate(20); rematch(); });
+        restartBtn.addEventListener('click', () => { 
+            vibrate(20); 
+            screens.restartModal.classList.remove('hidden'); 
+        });
     }
+
+    document.getElementById('confirm-restart-btn').addEventListener('click', () => { 
+        vibrate(20); 
+        screens.restartModal.classList.add('hidden'); 
+        rematch(); 
+    });
+    document.getElementById('cancel-restart-btn').addEventListener('click', () => { 
+        vibrate(20); 
+        screens.restartModal.classList.add('hidden'); 
+    });
 }
 
 function initSliders() {
