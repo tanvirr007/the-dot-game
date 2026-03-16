@@ -14,7 +14,10 @@ let gameState = {
     lastMove: null, // ID of the most recent move
     gameOver: false,
     isProcessing: false,
-    inactivityTimer: null
+    inactivityTimer: null,
+    timeTrial: false,
+    timeLeft: 10,
+    turnTimer: null
 };
 
 // DOM Elements
@@ -172,6 +175,14 @@ function setStartingPlayer(player) {
     updateSlider(btn);
 }
 
+function setTimeTrial(enabled) {
+    vibrate(20);
+    gameState.timeTrial = enabled;
+    document.getElementById('time-off').classList.toggle('active', !enabled);
+    document.getElementById('time-on').classList.toggle('active', enabled);
+    updateSlider(enabled ? document.getElementById('time-on') : document.getElementById('time-off'));
+}
+
 function showScreen(screenId) {
     Object.values(screens).forEach(s => s.classList.add('hidden'));
     screens[screenId].classList.remove('hidden');
@@ -180,8 +191,15 @@ function showScreen(screenId) {
     if (quitBtn) {
         if (screenId === 'game') {
             quitBtn.classList.remove('hidden');
+            if (gameState.timeTrial) {
+                document.getElementById('timer-container').classList.remove('hidden');
+            } else {
+                document.getElementById('timer-container').classList.add('hidden');
+            }
         } else {
             quitBtn.classList.add('hidden');
+            document.getElementById('timer-container').classList.add('hidden');
+            stopTurnTimer();
         }
     }
 }
@@ -194,6 +212,7 @@ function quitGame() {
     gameState.currentTurn = 1;
     gameState.lastMove = null;
     gameState.isProcessing = false; // Reset lock
+    stopTurnTimer();
     showScreen('setup');
     updateScoreboard();
 }
@@ -229,6 +248,7 @@ function startGame() {
             setTimeout(computerMove, 600);
         } else {
             resetInactivityTimer();
+            if (gameState.timeTrial) startTurnTimer();
         }
     });
 }
@@ -253,10 +273,15 @@ function createBoard() {
     gameBoard.style.width  = `${boardPx}px`;
     gameBoard.style.height = `${boardPx}px`;
 
-    // Dynamic Scoreboard Sizing
+    // Dynamic Scoreboard and Timer Sizing
     const scoreboard = document.querySelector('.scoreboard');
+    const timerContainer = document.getElementById('timer-container');
     if (scoreboard) {
         scoreboard.style.width = `${boardPx}px`;
+    }
+    if (timerContainer) {
+        timerContainer.style.width = `${boardPx}px`;
+        timerContainer.style.margin = '20px auto 0'; // Center it
     }
 
     // Create dots
@@ -369,6 +394,7 @@ function handleLineClick(line, isManual = false) {
     if (isManual) {
         // Coarse lock during the processing of a single move click
         gameState.isProcessing = true;
+        stopTurnTimer();
     }
 
     try {
@@ -468,6 +494,69 @@ function switchTurn() {
         // Ensure UI is unlocked for human turn
         setProcessing(false);
         resetInactivityTimer();
+        if (gameState.timeTrial) startTurnTimer();
+    } else if (gameState.mode === '1v1') {
+        if (gameState.timeTrial) startTurnTimer();
+    }
+}
+
+function startTurnTimer() {
+    stopTurnTimer();
+    if (!gameState.timeTrial || gameState.gameOver) return;
+
+    gameState.timeLeft = 10;
+    updateTimerUI();
+
+    gameState.turnTimer = setInterval(() => {
+        if (screens.quitModal.classList.contains('hidden') && screens.restartModal.classList.contains('hidden')) {
+            gameState.timeLeft -= 0.1;
+            updateTimerUI();
+
+            if (gameState.timeLeft <= 0) {
+                handleTimerExpire();
+            }
+        }
+    }, 100);
+}
+
+function stopTurnTimer() {
+    if (gameState.turnTimer) {
+        clearInterval(gameState.turnTimer);
+        gameState.turnTimer = null;
+    }
+    const timerBar = document.getElementById('timer-bar');
+    if (timerBar) {
+        timerBar.classList.remove('warning');
+        timerBar.style.width = '100%';
+    }
+}
+
+function updateTimerUI() {
+    const timerBar = document.getElementById('timer-bar');
+    if (!timerBar) return;
+
+    const percentage = (gameState.timeLeft / 10) * 100;
+    timerBar.style.width = `${percentage}%`;
+
+    if (gameState.timeLeft <= 3) {
+        timerBar.classList.add('warning');
+    } else {
+        timerBar.classList.remove('warning');
+    }
+}
+
+function handleTimerExpire() {
+    stopTurnTimer();
+    if (gameState.gameOver || gameState.isProcessing) return;
+
+    // Auto-move: pick a random available line
+    if (gameState.availableLines.length > 0) {
+        const randomIndex = Math.floor(Math.random() * gameState.availableLines.length);
+        const lineId = gameState.availableLines[randomIndex];
+        const line = document.getElementById(lineId);
+        if (line) {
+            handleLineClick(line, false);
+        }
     }
 }
 

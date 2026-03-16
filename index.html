@@ -60,6 +60,14 @@
                     </div>
                 </div>
 
+                <div class="setup-group">
+                    <label>Time Trial</label>
+                    <div class="toggle-group">
+                        <button id="time-off" class="toggle-btn active" onclick="setTimeTrial(false)">Off</button>
+                        <button id="time-on" class="toggle-btn" onclick="setTimeTrial(true)">On</button>
+                    </div>
+                </div>
+
                 <button id="start-btn" class="primary-btn">Start Game</button>
                 <div class="credits">
                     Made by <a href="https://github.com/tanvirr007" target="_blank">tanvir</a>
@@ -80,6 +88,10 @@
                         <span class="player-name">Player 2</span>
                         <span class="player-points">0</span>
                     </div>
+                </div>
+                <!-- Timer Bar -->
+                <div id="timer-container" class="hidden">
+                    <div id="timer-bar"></div>
                 </div>
             </div>
 
